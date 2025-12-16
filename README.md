@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Capital Galaxy
 
-## Getting Started
+Aplicación empresarial construida con Next.js 16, React 19 y Tailwind CSS v4.
 
-First, run the development server:
+## 🚀 Características
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- ✅ **Next.js 16** con App Router
+- ✅ **React 19** con Server Components
+- ✅ **Tailwind CSS v4** con tema personalizado
+- ✅ **TypeScript** para type safety
+- ✅ **shadcn/ui** componentes pre-configurados
+- ✅ **Tema claro/oscuro** con next-themes
+- ✅ **Sidebar responsivo** con navegación
+- ✅ **Validación de formularios** con react-hook-form + Zod
+- ✅ **Arquitectura escalable** con separación de concerns
+
+## 📁 Estructura del Proyecto
+
+```
+├── app/                    # App Router de Next.js
+│   ├── globals.css        # Estilos globales y variables de tema
+│   ├── layout.tsx         # Layout principal con ThemeProvider
+│   └── page.tsx           # Página de inicio
+├── components/            # Componentes React
+│   ├── ui/               # Componentes de shadcn/ui
+│   ├── app-sidebar.tsx   # Sidebar de navegación
+│   ├── sidebar-layout.tsx # Layout wrapper con sidebar
+│   ├── theme-provider.tsx # Provider de tema
+│   └── mode-toggle.tsx   # Toggle de tema claro/oscuro
+├── lib/                   # Utilidades y servicios
+│   ├── services/         # Servicios de API
+│   ├── utils.ts          # Funciones auxiliares (cn, etc.)
+│   └── env.ts            # Gestión de variables de entorno
+├── types/                 # Definiciones de TypeScript
+├── schemas/               # Esquemas Zod para validación
+├── hooks/                 # Custom React hooks
+├── db/                    # Base de datos (Drizzle ORM)
+├── docs/                  # Documentación del proyecto
+└── public/                # Archivos estáticos
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🏃 Inicio Rápido
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisitos
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Node.js 22+
+- npm, pnpm o yarn
 
-## Learn More
+### Instalación
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Clonar el repositorio
+git clone <repository-url>
+cd capital-galaxy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Instalar dependencias
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Ejecutar en desarrollo
+npm run dev
+```
 
-## Deploy on Vercel
+Abrir [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Scripts Disponibles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev          # Servidor de desarrollo
+npm run build        # Build de producción
+npm run start        # Servidor de producción
+npm run lint         # Linter
+```
+
+## 🎨 Tema
+
+El proyecto incluye soporte completo para tema claro/oscuro:
+
+- Variables CSS personalizadas en `app/globals.css`
+- Toggle de tema en el sidebar
+- Soporte para preferencia del sistema
+- Transiciones suaves entre temas
+
+## 📚 Documentación
+
+Para más información sobre la configuración y mejores prácticas del proyecto, consulta:
+
+- [Setup Guide](./docs/setup-guide.md) - Guía completa de configuración
+
+## 🏗️ Próximos Pasos
+
+- [ ] Configurar autenticación con Supabase
+- [ ] Configurar base de datos con Drizzle ORM
+- [ ] Implementar GitHub Actions para CI/CD
+- [ ] Agregar tests unitarios y de integración
+
+## 📖 Recursos
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [shadcn/ui](https://ui.shadcn.com)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [React Hook Form](https://react-hook-form.com)
+- [Zod](https://zod.dev)
+
+## 📝 Licencia
+
+Este proyecto es privado y confidencial.
