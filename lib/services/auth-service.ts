@@ -54,7 +54,7 @@ export class AuthService {
       password,
       options: {
         data: {
-          name,
+          full_name: name,
         },
       },
     })
@@ -71,6 +71,17 @@ export class AuthService {
     const { error } = await supabase.auth.signOut()
     if (error) {
         throw error
+    }
+  }
+
+  static async resetPasswordForEmail(email: string) {
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/auth/callback?next=/portal/profile/update-password`,
+    })
+    
+    if (error) {
+      throw error
     }
   }
 }

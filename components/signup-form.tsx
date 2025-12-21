@@ -34,7 +34,7 @@ export function SignupForm({
     const confirmPassword = formData.get("confirm-password") as string
 
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden")
+      setError("Passwords do not match")
       setIsLoading(false)
       return
     }
@@ -69,9 +69,9 @@ export function SignupForm({
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Crea tu cuenta</h1>
+          <h1 className="text-2xl font-bold">Create an account</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Completa el formulario para crear tu cuenta
+            Enter your email below to create your account
           </p>
         </div>
 
@@ -82,34 +82,34 @@ export function SignupForm({
         )}
 
         <Field>
-          <FieldLabel htmlFor="name">Nombre Completo</FieldLabel>
+          <FieldLabel htmlFor="name">Full Name</FieldLabel>
           <Input id="name" name="name" type="text" placeholder="John Doe" required />
         </Field>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input id="email" name="email" type="email" placeholder="m@example.com" required />
           <FieldDescription>
-            Usaremos esto para contactarte. No compartiremos tu email.
+            We&apos;ll use this to contact you. We won&apos;t share your email.
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+          <FieldLabel htmlFor="password">Password</FieldLabel>
           <Input id="password" name="password" type="password" required />
           <FieldDescription>
-            Debe tener al menos 8 caracteres.
+            Must be at least 8 characters.
           </FieldDescription>
         </Field>
         <Field>
-          <FieldLabel htmlFor="confirm-password">Confirmar Contraseña</FieldLabel>
+          <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
           <Input id="confirm-password" name="confirm-password" type="password" required />
-          <FieldDescription>Por favor confirma tu contraseña.</FieldDescription>
+          <FieldDescription>Please confirm your password.</FieldDescription>
         </Field>
         <Field>
           <Button type="submit" disabled={isLoading} className="w-full">
-            {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+            {isLoading ? "Creating account..." : "Create Account"}
           </Button>
         </Field>
-        <FieldSeparator>O continúa con</FieldSeparator>
+        <FieldSeparator>Or continue with</FieldSeparator>
         <Field>
           <Button variant="outline" type="button" onClick={handleGoogleLogin} className="w-full" disabled={isLoading}>
             <svg viewBox="0 0 24 24" className="mr-2 h-4 w-4" aria-hidden="true" fill="currentColor">
@@ -133,7 +133,7 @@ export function SignupForm({
             Google
           </Button>
           <FieldDescription className="px-6 text-center">
-            ¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a>
+            Already have an account? <a href="/login">Login</a>
           </FieldDescription>
         </Field>
       </FieldGroup>
