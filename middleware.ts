@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: { name: string; value: string; options: any }[]) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
           response = NextResponse.next({
             request,
@@ -29,7 +29,17 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (request.nextUrl.pathname.startsWith("/portal") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  if ((request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup") && user) {
+    return NextResponse.redirect(new URL("/portal", request.url))
+  }
 
   return response
 }

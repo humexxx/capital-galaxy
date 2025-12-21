@@ -16,39 +16,24 @@ import { DatePicker } from "./date-picker"
 import { NavUser } from "./nav-user"
 import { Calendars } from "./calendars"
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  calendars: [
-    {
-      name: "My Calendars",
-      items: ["Personal", "Work", "Family"],
-    },
-    {
-      name: "Favorites",
-      items: ["Holidays", "Birthdays"],
-    },
-    {
-      name: "Other",
-      items: ["Travel", "Reminders", "Deadlines"],
-    },
-  ],
-}
+import { type User } from "@supabase/supabase-js"
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user: User }) {
+  const userData = {
+    name: user.user_metadata.full_name || user.email?.split("@")[0] || "User",
+    email: user.email || "",
+    avatar: user.user_metadata.avatar_url || "",
+  }
+
   return (
     <Sidebar {...props}>
       <SidebarHeader className="border-sidebar-border h-16 border-b">
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarHeader>
       <SidebarContent>
         <DatePicker />
         <SidebarSeparator className="mx-0" />
-        <Calendars calendars={data.calendars} />
+        {/* <Calendars calendars={data.calendars} /> */}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

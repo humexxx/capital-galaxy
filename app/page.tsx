@@ -1,24 +1,20 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { AppHeader } from "@/components/app-header"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
-export default function Page() {
+export default function LandingPage() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <AppHeader />
-        <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-5">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div key={i} className="bg-muted/50 aspect-square rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-4 text-center">
+      <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">
+        Capital Galaxy
+      </h1>
+      <p className="text-xl text-muted-foreground">
+        Welcome to your capital management platform.
+      </p>
+      <div className="flex gap-4">
+        <Button asChild size="lg">
+          <Link href="/portal">Go to Portal</Link>
+        </Button>
+      </div>
+    </div>
   )
 }
