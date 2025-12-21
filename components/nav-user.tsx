@@ -30,6 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { createClient } from "@/lib/supabase"
 
 export function NavUser({
   user,
@@ -103,7 +104,11 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={async () => {
+              const supabase = createClient()
+              await supabase.auth.signOut()
+              window.location.href = "/login"
+            }}>
               <LogOut />
               Log out
             </DropdownMenuItem>
