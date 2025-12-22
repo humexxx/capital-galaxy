@@ -1,9 +1,9 @@
-export default function PortalPage({
+export default async function PortalPage({
   searchParams,
 }: {
-  searchParams: { month?: string; year?: string }
+  searchParams: Promise<{ month?: string; year?: string }>
 }) {
-  const { month, year } = searchParams
+  const { month, year } = await searchParams
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">

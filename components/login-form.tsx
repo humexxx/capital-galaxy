@@ -32,7 +32,7 @@ export function LoginForm({
 
     try {
       await AuthService.loginWithPassword(email, password)
-      router.push("/")
+      router.push("/portal")
       router.refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error initializing login")

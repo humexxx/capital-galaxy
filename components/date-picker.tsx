@@ -70,6 +70,20 @@ export function DatePicker() {
     <SidebarGroup className="px-0">
       <SidebarGroupContent>
         <div className="p-4 flex flex-col gap-4">
+          <Button 
+            variant={!searchParams.get("month") ? "default" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams)
+              params.delete("month")
+              params.delete("year")
+              router.replace(`?${params.toString()}`)
+              setDate(new Date())
+            }}
+          >
+            All Time
+          </Button>
+
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="icon" onClick={() => changeYear(-1)}>
               <ChevronLeft className="h-4 w-4" />
@@ -86,13 +100,34 @@ export function DatePicker() {
           </div>
           <div className="grid grid-cols-3 gap-2">
             {months.map((month, index) => {
-              const isFuture = date.getFullYear() === currentYear && index > currentMonth
+              const viewYear = date.getFullYear()
+              const isFuture = viewYear === currentYear && index > currentMonth
+              
+              // Check if this month is visually selected (matches URL params)
+              // We check param existence to avoid "All Time" defaulting to January
+              const paramMonth = searchParams.get("month")
+              const paramYear = searchParams.get("year")
+              const isSelected = paramMonth !== null && 
+                                 paramYear !== null &&
+                                 parseInt(paramMonth) === index && 
+                                 parseInt(paramYear) === viewYear
+
+              // Check if this is the actual current month (for secondary highlight)
+              const isCurrent = viewYear === currentYear && index === currentMonth
+
+              let variant: "default" | "secondary" | "ghost" = "ghost"
+              if (isSelected) {
+                variant = "default"
+              } else if (isCurrent) {
+                variant = "secondary"
+              }
+
               return (
                 <Button
                   key={month}
-                  variant={date.getMonth() === index ? "default" : "ghost"}
+                  variant={variant}
                   size="sm"
-                  className="h-8 text-xs"
+                  className="h-8 text-xs font-normal"
                   onClick={() => handleMonthSelect(index)}
                   disabled={isFuture}
                 >
