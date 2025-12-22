@@ -1,5 +1,5 @@
 import * as React from "react"
-import {  Plus } from "lucide-react"
+import {  Plus, List } from "lucide-react"
 
 import {
   Sidebar,
@@ -33,6 +33,16 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
       <SidebarContent>
         <MonthPicker />
         <SidebarSeparator className="mx-0" />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <a href="/portal/investment-methods">
+                <List />
+                <span>Investment Methods</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         {/* <Calendars calendars={data.calendars} /> */}
       </SidebarContent>
       <SidebarFooter>

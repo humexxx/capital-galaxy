@@ -1,4 +1,6 @@
-import { pgTable, text, uuid, timestamp, pgSchema } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, pgSchema, real, pgEnum } from "drizzle-orm/pg-core";
+
+export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
 
 // Define auth schema to reference auth.users
 const authSchema = pgSchema("auth");
@@ -15,4 +17,14 @@ export const users = pgTable("users", {
   fullName: text("full_name"),
   avatarUrl: text("avatar_url"),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+export const investmentMethods = pgTable("investment_methods", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description"),
+  author: text("author").notNull(),
+  riskLevel: riskLevelEnum("risk_level").notNull(),
+  monthlyRoi: real("monthly_roi").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
