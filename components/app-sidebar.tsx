@@ -4,7 +4,7 @@ import {  Plus } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  SidebarFooter,  
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -12,7 +12,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { DatePicker } from "./date-picker"
+import { MonthPicker } from "./month-picker"
 import { NavUser } from "./nav-user"
 import { Calendars } from "./calendars"
 
@@ -31,7 +31,7 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
         <NavUser user={userData} />
       </SidebarHeader>
       <SidebarContent>
-        <DatePicker />
+        <MonthPicker />
         <SidebarSeparator className="mx-0" />
         {/* <Calendars calendars={data.calendars} /> */}
       </SidebarContent>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export function DatePicker() {
+export function MonthPicker() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
