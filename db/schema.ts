@@ -1,6 +1,8 @@
-import { pgTable, text, uuid, timestamp, pgSchema, real, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, timestamp, pgSchema, real, pgEnum, numeric } from "drizzle-orm/pg-core";
 
 export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
+export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected"]);
+export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
 
 // Define auth schema to reference auth.users
 const authSchema = pgSchema("auth");
@@ -27,4 +29,33 @@ export const investmentMethods = pgTable("investment_methods", {
   riskLevel: riskLevelEnum("risk_level").notNull(),
   monthlyRoi: real("monthly_roi").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const portfolios = pgTable("portfolios", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" })
+    .unique(),
+  name: text("name").notNull().default("My Main Portfolio"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const transactions = pgTable("transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  portfolioId: uuid("portfolio_id")
+    .notNull()
+    .references(() => portfolios.id, { onDelete: "cascade" }),
+  investmentMethodId: uuid("investment_method_id")
+    .notNull()
+    .references(() => investmentMethods.id, { onDelete: "restrict" }),
+  type: transactionTypeEnum("type").notNull(),
+  amount: numeric("amount", { precision: 20, scale: 2 }).notNull(),
+  fee: numeric("fee", { precision: 20, scale: 2 }).notNull().default("0"),
+  total: numeric("total", { precision: 20, scale: 2 }).notNull(),
+  date: timestamp("date", { withTimezone: true }).notNull(),
+  notes: text("notes"),
+  status: transactionStatusEnum("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
