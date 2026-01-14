@@ -8,7 +8,10 @@ export interface User {
 }
 
 export interface AuthUser {
-  id: string
-  email: string
   name: string
 }
+
+import { z } from "zod"
+import { userFormSchema } from "@/schemas/user"
+
+export type UserFormData = z.infer<typeof userFormSchema>

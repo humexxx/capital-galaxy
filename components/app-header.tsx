@@ -1,51 +1,38 @@
-"use client"
+"use client";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { ModeToggle } from "@/components/mode-toggle"
-import { useSearchParams } from "next/navigation"
+import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
+import { NavUser } from "./nav-user";
+import { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
-export function AppHeader() {
-  const searchParams = useSearchParams()
-  const month = searchParams.get("month")
-  const year = searchParams.get("year")
-
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ]
-
-  let title = "All Time"
-  if (month && year) {
-    const monthIndex = parseInt(month)
-    if (!isNaN(monthIndex) && monthIndex >= 0 && monthIndex < 12) {
-        title = `${months[monthIndex]} ${year}`
-    }
-  }
+export function AppHeader({ user }: { user: User }) {
+  const userData = {
+    name: user.user_metadata.full_name || user.email?.split("@")[0] || "User",
+    email: user.email || "",
+    avatar: user.user_metadata.avatar_url || "",
+  };
 
   return (
-    <header className="bg-background sticky top-0 flex h-16 shrink-0 items-center gap-2 border-b px-4 justify-between">
-      <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-1" />
-        <Separator
-          orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-4"
-        />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage>{title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6 justify-between">
+      <div className="flex items-center gap-6">
+        <Link href="/portal" className="text-xl font-bold">
+          Capital Galaxy
+        </Link>
+        <nav className="flex items-center gap-6">
+          <Link href="/portal/portfolio">
+            <Button variant="ghost">Portfolio</Button>
+          </Link>
+          <Link href="/portal/investment-methods">
+            <Button variant="ghost">Investment Methods</Button>
+          </Link>
+        </nav>
       </div>
-      <ModeToggle />
+      <div className="flex items-center gap-4">
+        <ModeToggle />
+        <NavUser user={userData} />
+      </div>
     </header>
-  )
+  );
 }
+
