@@ -1,14 +1,17 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 import { ChartConfig } from "@/types/chart";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { useState } from "react";
 
 const chartConfig = {
   value: {
     label: "Portfolio Value",
-    color: "hsl(142.1 76.2% 36.3%)", // Green-500 equivalent used in shadcn
+    color: "hsl(142.1 76.2% 36.3%)",
   },
 } satisfies ChartConfig;
 
@@ -20,23 +23,34 @@ type PerformanceChartProps = {
 };
 
 export function PerformanceChart({ data }: PerformanceChartProps) {
-  // Mock data for visualization if no data provided (optional, but good for empty states if desired)
-  // For now, we render what is passed.
+  const [timeRange, setTimeRange] = useState("All");
   
+  // In a real app, filtering logic would go here based on timeRange
+
   return (
-    <Card className="border-none bg-transparent shadow-none">
-      <CardHeader className="px-0 pt-0">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">History</CardTitle>
-            <CardDescription>Portfolio value over time</CardDescription>
-          </div>
-          {/* Time range selector could go here */}
+    <Card className="col-span-2 bg-card">
+      <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-xl font-bold">History</CardTitle>
+          <Info className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
+          {["24h", "7d", "30d", "90d", "All"].map((range) => (
+            <Button
+              key={range}
+              variant={timeRange === range ? "secondary" : "ghost"}
+              size="sm"
+              className={`h-7 px-3 text-xs ${timeRange === range ? "bg-background shadow-sm" : "hover:bg-background/50"}`}
+              onClick={() => setTimeRange(range)}
+            >
+              {range}
+            </Button>
+          ))}
         </div>
       </CardHeader>
-      <CardContent className="px-0">
+      <CardContent className="pl-0">
         <ChartContainer config={chartConfig} className="h-[350px] w-full">
-          <AreaChart data={data} margin={{ left: 0, right: 0, top: 10, bottom: 0 }}>
+          <AreaChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -47,7 +61,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
                 <stop
                   offset="95%"
                   stopColor="var(--color-value)"
-                  stopOpacity={0.05}
+                  stopOpacity={0.0}
                 />
               </linearGradient>
             </defs>
@@ -67,6 +81,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={10}
+              width={60}
               tickFormatter={(value) => `$${value.toLocaleString()}`}
               domain={['auto', 'auto']}
             />

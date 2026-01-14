@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { AddTransactionDialog } from "@/components/portfolio/add-transaction-dialog";
-import { PortfolioOverview } from "@/components/portfolio/portfolio-overview";
 import { TransactionsTable } from "@/components/portfolio/transactions-table";
 import { PerformanceChart } from "@/components/portfolio/performance-chart";
+import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
+import { StatsCards } from "@/components/portfolio/stats-cards";
+import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Portfolio = {
   id: string;
@@ -33,6 +35,7 @@ type Transaction = {
   status: "pending" | "approved" | "rejected";
   notes?: string | null;
   investmentMethod: InvestmentMethod;
+  asset_symbol?: string; // Assuming we might have this, or use name
 };
 
 type PortfolioStats = {
@@ -57,6 +60,31 @@ type PortfolioData = {
 
 export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showCharts, setShowCharts] = useState(true);
+  const [hideValues, setHideValues] = useState(false);
+
+  // Calculate Allocation Data
+  const allocationData = useMemo(() => {
+    const map = new Map<string, number>();
+    const approved = data.transactions.filter(t => t.status === "approved");
+    
+    approved.forEach(t => {
+      const value = parseFloat(t.total);
+      // Use investment method name as asset identifier for now
+      const key = t.investmentMethod?.name || "Unknown"; 
+      if (t.type === "buy") {
+        map.set(key, (map.get(key) || 0) + value);
+      } else {
+        map.set(key, (map.get(key) || 0) - value);
+      }
+    });
+
+    return Array.from(map.entries()).map(([name, value], index) => ({
+      name,
+      value: Math.max(0, value), // No negative allocation visualization
+      fill: `var(--chart-${(index % 5) + 1})`,
+    })).filter(item => item.value > 0);
+  }, [data.transactions]);
 
   const handleAddTransaction = async (transactionData: {
     investmentMethodId: string;
@@ -95,69 +123,85 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
     );
   }
 
+  // Calculate daily change (mocked for now as we don't have historical snapshot in stats)
+  // For now, assuming daily change is 0 or part of allTimeProfit if implied.
+  // The image shows specific 24h change. We'll pass 0 if not available.
+  const dailyChange = 0; 
+  const dailyChangePercentage = 0;
+
   return (
     <>
-      <div className="flex flex-1 flex-col gap-6 p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Portfolio</h1>
-            <div className="flex items-baseline gap-4 mt-2">
-              <span className="text-4xl font-bold">
-                ${data.stats?.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}
-              </span>
-              {/* P/L Summary could go here if available */}
-            </div>
-          </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            + Add Transaction
-          </Button>
-        </div>
+      <div className="flex flex-1 flex-col gap-8 p-8 max-w-[1600px] mx-auto">
+        
+        {/* Top Header Section */}
+        <PortfolioHeader 
+          portfolioName={data.portfolio.name}
+          totalValue={data.stats?.totalValue || 0}
+          dailyChange={dailyChange}
+          dailyChangePercentage={dailyChangePercentage}
+          onAddTransaction={() => setIsDialogOpen(true)}
+          showCharts={showCharts}
+          onToggleCharts={() => setShowCharts(!showCharts)}
+          hideValues={hideValues}
+          onToggleHideValues={() => setHideValues(!hideValues)}
+        />
 
+        {/* Tabs and Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          </TabsList>
+          <div className="border-b">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* KPI Cards */}
             {data.stats && (
-              <PortfolioOverview
-                portfolioName={data.portfolio.name}
-                totalValue={data.stats.totalValue}
+              <StatsCards 
                 allTimeProfit={data.stats.allTimeProfit}
                 allTimeProfitPercentage={data.stats.allTimeProfitPercentage}
                 costBasis={data.stats.costBasis}
+                hideValues={hideValues}
+                // Best/Worst performers could be calculated from allocationData if we tracked cost basis per asset
+                // For now passing undefined or simple placeholders if we can't derive easily
               />
             )}
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <div className="col-span-2">
-                {data.chartData.length > 0 ? (
-                  <PerformanceChart data={data.chartData} />
-                ) : (
-                   <Card className="h-[400px] flex items-center justify-center">
-                     <div className="text-center text-muted-foreground">
-                       <p>Not enough data for chart</p>
-                       <p className="text-sm">Approve transactions to see history</p>
-                     </div>
-                   </Card>
-                )}
+            {/* Charts Grid */}
+            {showCharts && (
+              <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+                {/* History Chart - Takes up 2 columns */}
+                <div className="lg:col-span-2">
+                  {data.chartData.length > 0 ? (
+                      <PerformanceChart data={data.chartData} />
+                  ) : (
+                      <Card className="h-[400px] flex items-center justify-center bg-card">
+                        <div className="text-center text-muted-foreground">
+                          <p>Not enough data for chart</p>
+                          <p className="text-sm">Approve transactions to see history</p>
+                        </div>
+                      </Card>
+                  )}
+                </div>
+                
+                {/* Allocation Chart - Takes up 1 column */}
+                <div className="lg:col-span-1">
+                  <AllocationChart data={allocationData} />
+                </div>
               </div>
-              <div className="col-span-1">
-                 <Card className="h-[400px]">
-                   <CardHeader>
-                     <CardTitle>Allocation</CardTitle>
-                   </CardHeader>
-                   <CardContent className="flex items-center justify-center h-[320px]">
-                     <div className="text-muted-foreground">Coming soon</div>
-                   </CardContent>
-                 </Card>
-              </div>
-            </div>
+            )}
+            
+            {/* Future: Performance (Cumulative) Chart could go here or in the grid above */}
+
           </TabsContent>
 
           <TabsContent value="transactions" className="mt-6">
-            <TransactionsTable transactions={data.transactions} />
+             <Card className="bg-card">
+               <CardContent className="p-0">
+                  <TransactionsTable transactions={data.transactions} />
+               </CardContent>
+             </Card>
           </TabsContent>
         </Tabs>
       </div>
