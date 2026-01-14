@@ -67,11 +67,11 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
   const allocationData = useMemo(() => {
     const map = new Map<string, number>();
     const approved = data.transactions.filter(t => t.status === "approved");
-    
+
     approved.forEach(t => {
       const value = parseFloat(t.total);
       // Use investment method name as asset identifier for now
-      const key = t.investmentMethod?.name || "Unknown"; 
+      const key = t.investmentMethod?.name || "Unknown";
       if (t.type === "buy") {
         map.set(key, (map.get(key) || 0) + value);
       } else {
@@ -126,15 +126,15 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
   // Calculate daily change (mocked for now as we don't have historical snapshot in stats)
   // For now, assuming daily change is 0 or part of allTimeProfit if implied.
   // The image shows specific 24h change. We'll pass 0 if not available.
-  const dailyChange = 0; 
+  const dailyChange = 0;
   const dailyChangePercentage = 0;
 
   return (
     <>
       <div className="flex flex-1 flex-col gap-8 p-8 max-w-[1600px] mx-auto">
-        
+
         {/* Top Header Section */}
-        <PortfolioHeader 
+        <PortfolioHeader
           portfolioName={data.portfolio.name}
           totalValue={data.stats?.totalValue || 0}
           dailyChange={dailyChange}
@@ -148,23 +148,23 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
 
         {/* Tabs and Content */}
         <Tabs defaultValue="overview" className="w-full">
-          <div className="border-b">
+          <div>
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="transactions">Transactions</TabsTrigger>
             </TabsList>
           </div>
-          
+
           <TabsContent value="overview" className="space-y-6 mt-6">
             {/* KPI Cards */}
             {data.stats && (
-              <StatsCards 
+              <StatsCards
                 allTimeProfit={data.stats.allTimeProfit}
                 allTimeProfitPercentage={data.stats.allTimeProfitPercentage}
                 costBasis={data.stats.costBasis}
                 hideValues={hideValues}
-                // Best/Worst performers could be calculated from allocationData if we tracked cost basis per asset
-                // For now passing undefined or simple placeholders if we can't derive easily
+              // Best/Worst performers could be calculated from allocationData if we tracked cost basis per asset
+              // For now passing undefined or simple placeholders if we can't derive easily
               />
             )}
 
@@ -174,34 +174,34 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
                 {/* History Chart - Takes up 2 columns */}
                 <div className="lg:col-span-2">
                   {data.chartData.length > 0 ? (
-                      <PerformanceChart data={data.chartData} />
+                    <PerformanceChart data={data.chartData} />
                   ) : (
-                      <Card className="h-[400px] flex items-center justify-center bg-card">
-                        <div className="text-center text-muted-foreground">
-                          <p>Not enough data for chart</p>
-                          <p className="text-sm">Approve transactions to see history</p>
-                        </div>
-                      </Card>
+                    <Card className="h-[400px] flex items-center justify-center bg-card">
+                      <div className="text-center text-muted-foreground">
+                        <p>Not enough data for chart</p>
+                        <p className="text-sm">Approve transactions to see history</p>
+                      </div>
+                    </Card>
                   )}
                 </div>
-                
+
                 {/* Allocation Chart - Takes up 1 column */}
                 <div className="lg:col-span-1">
                   <AllocationChart data={allocationData} />
                 </div>
               </div>
             )}
-            
+
             {/* Future: Performance (Cumulative) Chart could go here or in the grid above */}
 
           </TabsContent>
 
           <TabsContent value="transactions" className="mt-6">
-             <Card className="bg-card">
-               <CardContent className="p-0">
-                  <TransactionsTable transactions={data.transactions} />
-               </CardContent>
-             </Card>
+            <Card className="bg-card">
+              <CardContent>
+                <TransactionsTable transactions={data.transactions} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

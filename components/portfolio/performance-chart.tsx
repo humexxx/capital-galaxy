@@ -11,7 +11,7 @@ import { useState } from "react";
 const chartConfig = {
   value: {
     label: "Portfolio Value",
-    color: "hsl(142.1 76.2% 36.3%)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
@@ -25,8 +25,6 @@ type PerformanceChartProps = {
 export function PerformanceChart({ data }: PerformanceChartProps) {
   const [timeRange, setTimeRange] = useState("All");
   
-  // In a real app, filtering logic would go here based on timeRange
-
   return (
     <Card className="col-span-2 bg-card">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -50,21 +48,11 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
       </CardHeader>
       <CardContent className="pl-0">
         <ChartContainer config={chartConfig} className="h-[350px] w-full">
-          <AreaChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 0 }}>
-            <defs>
-              <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-value)"
-                  stopOpacity={0.3}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-value)"
-                  stopOpacity={0.0}
-                />
-              </linearGradient>
-            </defs>
+          <AreaChart
+            accessibilityLayer
+            data={data}
+            margin={{ left: 10, right: 10, top: 10, bottom: 0 }}
+          >
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 3" strokeOpacity={0.5} />
             <XAxis
               dataKey="date"
@@ -90,9 +78,9 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
             />
             <Area
               dataKey="value"
-              type="monotone"
-              fill="url(#fillValue)"
-              fillOpacity={1}
+              type="natural"
+              fill="var(--color-value)"
+              fillOpacity={0.4}
               stroke="var(--color-value)"
               strokeWidth={2}
             />

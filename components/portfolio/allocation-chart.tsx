@@ -19,7 +19,7 @@ export function AllocationChart({ data }: { data?: any[] }) {
       </CardHeader>
       <CardContent className="flex items-center justify-center p-0">
         <ChartContainer config={chartConfig} className="h-[300px] w-full mx-auto aspect-square">
-           <PieChart>
+           <PieChart accessibilityLayer>
               <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
               <Pie
                 data={chartData}
