@@ -17,7 +17,7 @@ export function TransactionFilters() {
     const searchParams = useSearchParams();
 
     const [userId, setUserId] = useState(searchParams.get("userId") || "");
-    const [status, setStatus] = useState(searchParams.get("status") || "all");
+    const [status, setStatus] = useState(searchParams.get("status") || "pending");
     const [type, setType] = useState(searchParams.get("type") || "all");
 
     const applyFilters = () => {
@@ -37,9 +37,9 @@ export function TransactionFilters() {
 
     const clearFilters = () => {
         setUserId("");
-        setStatus("all");
+        setStatus("pending");
         setType("all");
-        router.push("?");
+        router.push("?status=pending");
     };
 
     return (

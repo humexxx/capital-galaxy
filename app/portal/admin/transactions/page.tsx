@@ -23,7 +23,7 @@ export default async function AdminTransactionsPage({
     const userId = typeof params.userId === "string" ? params.userId : undefined;
     const status = typeof params.status === "string" && ["pending", "approved", "rejected"].includes(params.status)
         ? (params.status as "pending" | "approved" | "rejected")
-        : undefined;
+        : "pending"; // Default to pending
     const type = typeof params.type === "string" && ["buy", "withdrawal"].includes(params.type)
         ? (params.type as "buy" | "withdrawal")
         : undefined;
