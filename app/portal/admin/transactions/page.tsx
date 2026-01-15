@@ -21,9 +21,17 @@ export default async function AdminTransactionsPage({
     // Parse filters
     const params = await searchParams;
     const userId = typeof params.userId === "string" ? params.userId : undefined;
-    const status = typeof params.status === "string" && ["pending", "approved", "rejected"].includes(params.status)
-        ? (params.status as "pending" | "approved" | "rejected")
-        : "pending"; // Default to pending
+    
+    // If no status param, default to pending. If status is explicitly in URL, use it (or undefined for "all")
+    let status: "pending" | "approved" | "rejected" | undefined;
+    if (params.status === undefined) {
+        status = "pending"; // Default when first loading the page
+    } else if (typeof params.status === "string" && ["pending", "approved", "rejected"].includes(params.status)) {
+        status = params.status as "pending" | "approved" | "rejected";
+    } else {
+        status = undefined; // For "all" or any other value
+    }
+    
     const type = typeof params.type === "string" && ["buy", "withdrawal"].includes(params.type)
         ? (params.type as "buy" | "withdrawal")
         : undefined;

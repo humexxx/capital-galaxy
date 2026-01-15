@@ -9,30 +9,31 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 
 export function TransactionFilters() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [isPending, startTransition] = useTransition();
 
     const [userId, setUserId] = useState(searchParams.get("userId") || "");
     const [status, setStatus] = useState(searchParams.get("status") || "pending");
     const [type, setType] = useState(searchParams.get("type") || "all");
 
     useEffect(() => {
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams();
 
         if (userId) params.set("userId", userId);
-        else params.delete("userId");
-
         if (status && status !== "all") params.set("status", status);
-        else params.delete("status");
-
+        else if (status === "all") params.set("status", "all");
         if (type && type !== "all") params.set("type", type);
-        else params.delete("type");
 
-        router.push(`?${params.toString()}`);
-    }, [userId, status, type, router, searchParams]);
+        const newUrl = params.toString() ? `?${params.toString()}` : "/portal/admin/transactions";
+        
+        startTransition(() => {
+            router.replace(newUrl);
+        });
+    }, [userId, status, type, router]);
 
     return (
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-end">
