@@ -84,7 +84,8 @@ El proyecto incluye soporte completo para tema claro/oscuro:
 
 Para más información sobre la configuración y mejores prácticas del proyecto, consulta:
 
-- [Setup Guide](./docs/setup-guide.md) - Guía completa de configuración
+- [Guía de Configuración](./docs/setup-guide.md) - Guía completa de configuración
+- [Reglas del Proyecto](./docs/project-rules.md) - Arquitectura y estándares de código (Lectura obligatoria para Agentes)
 
 ## 🏗️ Próximos Pasos
 
