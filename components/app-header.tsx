@@ -1,10 +1,10 @@
 "use client";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import { Button } from "@/components/ui/button";
+
 import { NavUser } from "./nav-user";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { User } from "@supabase/supabase-js";
-import Link from "next/link";
 
 export function AppHeader({ user }: { user: User }) {
   const userData = {
@@ -15,18 +15,9 @@ export function AppHeader({ user }: { user: User }) {
 
   return (
     <header className="sticky top-0 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6 justify-between">
-      <div className="flex items-center gap-6">
-        <Link href="/portal" className="text-xl font-bold">
-          Capital Galaxy
-        </Link>
-        <nav className="flex items-center gap-6">
-          <Link href="/portal/portfolio">
-            <Button variant="ghost">Portfolio</Button>
-          </Link>
-          <Link href="/portal/investment-methods">
-            <Button variant="ghost">Investment Methods</Button>
-          </Link>
-        </nav>
+      <div className="flex items-center gap-4">
+        <SidebarTrigger />
+        <h1 className="text-xl font-bold">Capital Galaxy</h1>
       </div>
       <div className="flex items-center gap-4">
         <ModeToggle />

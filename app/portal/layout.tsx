@@ -1,6 +1,8 @@
 import { AppHeader } from "@/components/app-header";
 import { createClient } from "@/lib/supabase-server";
 import { redirect } from "next/navigation";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function PortalLayout({
   children,
@@ -18,9 +20,12 @@ export default async function PortalLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <AppHeader user={user} />
-      <main className="flex-1">{children}</main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <AppHeader user={user} />
+        <main className="flex-1 p-6">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
