@@ -9,8 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function TransactionFilters() {
     const router = useRouter();
@@ -20,7 +19,7 @@ export function TransactionFilters() {
     const [status, setStatus] = useState(searchParams.get("status") || "pending");
     const [type, setType] = useState(searchParams.get("type") || "all");
 
-    const applyFilters = () => {
+    useEffect(() => {
         const params = new URLSearchParams(searchParams.toString());
 
         if (userId) params.set("userId", userId);
@@ -33,14 +32,7 @@ export function TransactionFilters() {
         else params.delete("type");
 
         router.push(`?${params.toString()}`);
-    };
-
-    const clearFilters = () => {
-        setUserId("");
-        setStatus("pending");
-        setType("all");
-        router.push("?status=pending");
-    };
+    }, [userId, status, type, router, searchParams]);
 
     return (
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-end">
@@ -80,11 +72,6 @@ export function TransactionFilters() {
                         <SelectItem value="withdrawal">Withdrawal</SelectItem>
                     </SelectContent>
                 </Select>
-            </div>
-
-            <div className="flex gap-2">
-                <Button onClick={applyFilters}>Apply</Button>
-                <Button variant="outline" onClick={clearFilters}>Clear</Button>
             </div>
         </div>
     );

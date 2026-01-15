@@ -9,6 +9,17 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { approveTransaction, rejectTransaction } from "@/app/actions/admin-transactions";
 import { toast } from "sonner";
 import type { AdminTransactionRow } from "@/types/transaction";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TransactionRowProps {
     transaction: AdminTransactionRow;
@@ -80,27 +91,82 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
                     {transaction.status}
                 </Badge>
             </TableCell>
-            <TableCell className="text-right">
-                {transaction.status === "pending" && (
+            <TableCell>
+                {transaction.approvedBy && transaction.approvedAt && (
+                    <div className="flex flex-col text-sm">
+                        <span className="font-medium text-green-600">
+                            {transaction.approvedBy.fullName || transaction.approvedBy.email}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                            {format(new Date(transaction.approvedAt), "PPp")}
+                        </span>
+                    </div>
+                )}
+                {transaction.rejectedBy && transaction.rejectedAt && (
+                    <div className="flex flex-col text-sm">
+                        <span className="font-medium text-red-600">
+                            {transaction.rejectedBy.fullName || transaction.rejectedBy.email}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                            {format(new Date(transaction.rejectedAt), "PPp")}
+                        </span>
+                    </div>
+                )}
+                {!transaction.approvedBy && !transaction.rejectedBy && (
+                    <span className="text-sm text-muted-foreground">-</span>
+                )}
+            </TableCell>
+            <TableCell className="text-right">{transaction.status === "pending" && (
                     <div className="flex items-center justify-end gap-2">
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 text-green-600"
-                            onClick={onApprove}
-                            title="Approve"
-                        >
-                            <Check className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 text-red-600"
-                            onClick={onReject}
-                            title="Reject"
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className="h-8 w-8 text-green-600"
+                                    title="Approve"
+                                >
+                                    <Check className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Approve Transaction</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to approve this <strong>${transaction.amount}</strong> {transaction.type} transaction for <strong>{transaction.user?.fullName || transaction.user?.email}</strong>{transaction.user?.email && transaction.user?.fullName && ` (${transaction.user.email})`}?
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onApprove}>Approve</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className="h-8 w-8 text-red-600"
+                                    title="Reject"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Reject Transaction</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to reject this <strong>${transaction.amount}</strong> {transaction.type} transaction for <strong>{transaction.user?.fullName || transaction.user?.email}</strong>{transaction.user?.email && transaction.user?.fullName && ` (${transaction.user.email})`}? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onReject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Reject</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 )}
             </TableCell>

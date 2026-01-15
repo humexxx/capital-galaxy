@@ -43,6 +43,13 @@
       "when": 1768436702672,
       "tag": "0005_remarkable_outlaw_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768442551095,
+      "tag": "0006_romantic_outlaw_kid",
+      "breakpoints": true
     }
   ]
 }

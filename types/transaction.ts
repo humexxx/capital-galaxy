@@ -39,4 +39,16 @@ export type AdminTransactionRow = {
     name: string;
   } | null;
   portfolioName: string | null;
+  approvedAt: Date | null;
+  approvedBy: {
+    id: string;
+    email: string | null;
+    fullName: string | null;
+  } | null;
+  rejectedAt: Date | null;
+  rejectedBy: {
+    id: string;
+    email: string | null;
+    fullName: string | null;
+  } | null;
 };

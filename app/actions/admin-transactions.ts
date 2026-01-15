@@ -12,28 +12,36 @@ const transactionActionSchema = z.object({
 });
 
 export async function approveTransaction(transactionId: string) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   
   const parsed = transactionActionSchema.safeParse({ id: transactionId });
   if (!parsed.success) throw new Error("Invalid ID");
 
   await db
     .update(transactions)
-    .set({ status: "approved" })
+    .set({ 
+      status: "approved",
+      approvedAt: new Date(),
+      approvedBy: admin.id,
+    })
     .where(eq(transactions.id, transactionId));
 
   revalidatePath("/portal/admin/transactions");
 }
 
 export async function rejectTransaction(transactionId: string) {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const parsed = transactionActionSchema.safeParse({ id: transactionId });
   if (!parsed.success) throw new Error("Invalid ID");
 
   await db
     .update(transactions)
-    .set({ status: "rejected" })
+    .set({ 
+      status: "rejected",
+      rejectedAt: new Date(),
+      rejectedBy: admin.id,
+    })
     .where(eq(transactions.id, transactionId));
 
   revalidatePath("/portal/admin/transactions");

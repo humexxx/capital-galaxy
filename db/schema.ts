@@ -58,6 +58,10 @@ export const transactions = pgTable("transactions", {
   date: timestamp("date", { withTimezone: true }).notNull(),
   notes: text("notes"),
   status: transactionStatusEnum("status").notNull().default("pending"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvedBy: uuid("approved_by").references(() => users.id, { onDelete: "set null" }),
+  rejectedAt: timestamp("rejected_at", { withTimezone: true }),
+  rejectedBy: uuid("rejected_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });

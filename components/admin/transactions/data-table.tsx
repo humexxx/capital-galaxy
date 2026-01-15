@@ -26,6 +26,7 @@ export function DataTable({ data }: DataTableProps) {
                         <TableHead>Type</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Processed By</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -36,7 +37,7 @@ export function DataTable({ data }: DataTableProps) {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center">
+                            <TableCell colSpan={7} className="h-24 text-center">
                                 No results.
                             </TableCell>
                         </TableRow>

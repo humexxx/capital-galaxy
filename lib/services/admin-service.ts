@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { transactions, users, investmentMethods, portfolios } from "@/db/schema";
 import { desc, eq, and, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 export type TransactionFilter = {
   userId?: string;
@@ -10,6 +11,10 @@ export type TransactionFilter = {
 
 export async function getAdminTransactions(filters?: TransactionFilter) {
   const conditions: SQL[] = [];
+
+  // Create aliases for approved/rejected by users
+  const approvedByUser = alias(users, "approvedByUser");
+  const rejectedByUser = alias(users, "rejectedByUser");
 
   if (filters?.userId) {
     conditions.push(eq(users.id, filters.userId));
@@ -42,6 +47,18 @@ export async function getAdminTransactions(filters?: TransactionFilter) {
         name: investmentMethods.name,
       },
       portfolioName: portfolios.name,
+      approvedAt: transactions.approvedAt,
+      approvedBy: {
+        id: approvedByUser.id,
+        email: approvedByUser.email,
+        fullName: approvedByUser.fullName,
+      },
+      rejectedAt: transactions.rejectedAt,
+      rejectedBy: {
+        id: rejectedByUser.id,
+        email: rejectedByUser.email,
+        fullName: rejectedByUser.fullName,
+      },
     })
     .from(transactions)
     .leftJoin(portfolios, eq(transactions.portfolioId, portfolios.id))
@@ -50,6 +67,8 @@ export async function getAdminTransactions(filters?: TransactionFilter) {
       investmentMethods,
       eq(transactions.investmentMethodId, investmentMethods.id)
     )
+    .leftJoin(approvedByUser, eq(transactions.approvedBy, approvedByUser.id))
+    .leftJoin(rejectedByUser, eq(transactions.rejectedBy, rejectedByUser.id))
     .$dynamic();
 
   const query = conditions.length > 0 
