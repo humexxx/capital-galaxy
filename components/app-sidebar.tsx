@@ -5,6 +5,7 @@ import {
     PieChart,
     Home,
     TrendingUp,
+    ShieldCheck,
 } from "lucide-react"
 
 import {
@@ -22,26 +23,35 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-const items = [
-    {
-        title: "Dashboard",
-        url: "/portal",
-        icon: Home,
-    },
-    {
-        title: "Portfolio",
-        url: "/portal/portfolio",
-        icon: PieChart,
-    },
-    {
-        title: "Investment Methods",
-        url: "/portal/investment-methods",
-        icon: TrendingUp,
-    },
-]
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ role, ...props }: React.ComponentProps<typeof Sidebar> & { role?: "admin" | "user" }) {
     const pathname = usePathname()
+
+    const items = [
+        {
+            title: "Dashboard",
+            url: "/portal",
+            icon: Home,
+        },
+        {
+            title: "Portfolio",
+            url: "/portal/portfolio",
+            icon: PieChart,
+        },
+        {
+            title: "Investment Methods",
+            url: "/portal/investment-methods",
+            icon: TrendingUp,
+        },
+    ]
+
+    // Add admin items if role is admin
+    if (role === "admin") {
+        items.push({
+            title: "Transactions",
+            url: "/portal/admin/transactions",
+            icon: ShieldCheck,
+        })
+    }
 
     return (
         <Sidebar collapsible="icon" {...props}>

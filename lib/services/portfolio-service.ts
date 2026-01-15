@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { portfolios, transactions, investmentMethods } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import type { PortfolioTransaction, PortfolioStats, PortfolioAsset } from "@/types/portfolio";
 
 export async function getUserPortfolio(userId: string) {
   const portfolio = await db.query.portfolios.findFirst({
@@ -20,7 +21,7 @@ export async function createPortfolio(userId: string, name?: string) {
   return portfolio;
 }
 
-export async function getPortfolioStats(portfolioId: string) {
+export async function getPortfolioStats(portfolioId: string): Promise<PortfolioStats> {
   const approvedTransactions = await db
     .select()
     .from(transactions)
@@ -49,7 +50,7 @@ export async function getPortfolioStats(portfolioId: string) {
   };
 }
 
-export async function getPortfolioTransactions(portfolioId: string) {
+export async function getPortfolioTransactions(portfolioId: string): Promise<PortfolioTransaction[]> {
   const allTransactions = await db
     .select({
       id: transactions.id,
@@ -70,10 +71,12 @@ export async function getPortfolioTransactions(portfolioId: string) {
     .where(eq(transactions.portfolioId, portfolioId))
     .orderBy(transactions.date);
 
-  return allTransactions.filter((t) => t.investmentMethod !== null);
+  return allTransactions.filter(
+    (t): t is PortfolioTransaction => t.investmentMethod !== null
+  );
 }
 
-export async function getPortfolioAssets(portfolioId: string) {
+export async function getPortfolioAssets(portfolioId: string): Promise<PortfolioAsset[]> {
   const allTransactions = await db
     .select({
       investmentMethodId: transactions.investmentMethodId,
@@ -90,7 +93,7 @@ export async function getPortfolioAssets(portfolioId: string) {
     )
     .where(eq(transactions.portfolioId, portfolioId));
 
-  const groupedAssets = allTransactions.reduce((acc, transaction) => {
+  const groupedAssets = allTransactions.reduce<Record<string, PortfolioAsset>>((acc, transaction) => {
     if (!transaction.investmentMethod) return acc;
 
     const methodId = transaction.investmentMethodId;
@@ -128,7 +131,7 @@ export async function getPortfolioAssets(portfolioId: string) {
     }
 
     return acc;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, PortfolioAsset>);
 
-  return Object.values(groupedAssets).filter((asset: any) => asset.holdingAmount > 0 || asset.pendingAmount > 0);
+  return Object.values(groupedAssets).filter((asset) => asset.holdingAmount > 0 || asset.pendingAmount > 0);
 }

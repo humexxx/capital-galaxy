@@ -1,5 +1,6 @@
 import { pgTable, text, uuid, timestamp, pgSchema, real, pgEnum, numeric } from "drizzle-orm/pg-core";
 
+export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);
 export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
 export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected"]);
 export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
@@ -18,6 +19,7 @@ export const users = pgTable("users", {
   email: text("email"),
   fullName: text("full_name"),
   avatarUrl: text("avatar_url"),
+  role: userRoleEnum("role").default("user"),
   updatedAt: timestamp("updated_at", { withTimezone: true }),
 });
 
