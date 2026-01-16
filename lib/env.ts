@@ -1,15 +1,11 @@
-export interface Env {
-  NEXT_PUBLIC_BASE_URL?: string
-  DATABASE_URL?: string
-  NEXT_PUBLIC_SUPABASE_URL?: string
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY?: string
-}
+import { Env } from "@/types/env"
 
 export const env: Env = {
   NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   DATABASE_URL: process.env.DATABASE_URL,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY,
+  CRON_SECRET: process.env.CRON_SECRET,
 }
 
 export function getBaseUrl(): string {

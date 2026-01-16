@@ -1,61 +1,90 @@
+"use client"
+
 import * as React from "react"
-import {  Plus, List } from "lucide-react"
+import {
+    PieChart,
+    Home,
+    TrendingUp,
+    ShieldCheck,
+} from "lucide-react"
 
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,  
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarSeparator,
+    Sidebar,
+    SidebarContent,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarRail,
 } from "@/components/ui/sidebar"
-import { MonthPicker } from "./month-picker"
-import { NavUser } from "./nav-user"
-import { Calendars } from "./calendars"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-import { type User } from "@supabase/supabase-js"
+export function AppSidebar({ role, ...props }: React.ComponentProps<typeof Sidebar> & { role?: "admin" | "user" }) {
+    const pathname = usePathname()
 
-export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user: User }) {
-  const userData = {
-    name: user.user_metadata.full_name || user.email?.split("@")[0] || "User",
-    email: user.email || "",
-    avatar: user.user_metadata.avatar_url || "",
-  }
+    const items = [
+        {
+            title: "Dashboard",
+            url: "/portal",
+            icon: Home,
+        },
+        {
+            title: "Portfolio",
+            url: "/portal/portfolio",
+            icon: PieChart,
+        },
+        {
+            title: "Investment Methods",
+            url: "/portal/investment-methods",
+            icon: TrendingUp,
+        },
+    ]
 
-  return (
-    <Sidebar {...props}>
-      <SidebarHeader className="border-sidebar-border h-16 border-b">
-        <NavUser user={userData} />
-      </SidebarHeader>
-      <SidebarContent>
-        <MonthPicker />
-        <SidebarSeparator className="mx-0" />
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <a href="/portal/investment-methods">
-                <List />
-                <span>Investment Methods</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        {/* <Calendars calendars={data.calendars} /> */}
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Plus />
-              <span>New Calendar</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-  )
+    // Add admin items if role is admin
+    if (role === "admin") {
+        items.push({
+            title: "Transactions",
+            url: "/portal/admin/transactions",
+            icon: ShieldCheck,
+        })
+    }
+
+    return (
+        <Sidebar collapsible="icon" {...props}>
+            <SidebarHeader>
+                <div className="flex items-center gap-2 px-2 py-1">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
+                        C
+                    </div>
+                    <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
+                        Capital Galaxy
+                    </span>
+                </div>
+            </SidebarHeader>
+            <SidebarContent>
+                <SidebarGroup>
+                    <SidebarGroupLabel>Menu</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {items.map((item) => (
+                                <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                                        <Link href={item.url}>
+                                            <item.icon />
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+            <SidebarRail />
+        </Sidebar>
+    )
 }

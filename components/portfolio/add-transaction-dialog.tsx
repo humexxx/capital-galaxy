@@ -1,0 +1,95 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { InvestmentMethodSelector } from "./investment-method-selector";
+import { TransactionForm } from "./transaction-form";
+
+type InvestmentMethod = {
+  id: string;
+  name: string;
+  author: string;
+  riskLevel: string;
+  monthlyRoi: number;
+};
+
+type AddTransactionDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  methods: InvestmentMethod[];
+  onSubmit: (data: {
+    investmentMethodId: string;
+    amount: string;
+    date: Date;
+    notes?: string;
+  }) => void;
+};
+
+export function AddTransactionDialog({
+  open,
+  onClose,
+  methods,
+  onSubmit,
+}: AddTransactionDialogProps) {
+  const [selectedMethod, setSelectedMethod] = useState<InvestmentMethod | null>(null);
+  const [showSelector, setShowSelector] = useState(true);
+
+  const handleMethodSelect = (method: InvestmentMethod) => {
+    setSelectedMethod(method);
+    setShowSelector(false);
+  };
+
+  const handleChangeMethod = () => {
+    setShowSelector(true);
+  };
+
+  const handleSubmit = (data: { amount: string; date: Date; notes?: string }) => {
+    if (!selectedMethod) return;
+    
+    onSubmit({
+      investmentMethodId: selectedMethod.id,
+      ...data,
+    });
+
+    setSelectedMethod(null);
+    setShowSelector(true);
+    onClose();
+  };
+
+  const handleClose = () => {
+    setSelectedMethod(null);
+    setShowSelector(true);
+    onClose();
+  };
+
+  return (
+    <>
+      <InvestmentMethodSelector
+        open={open && showSelector}
+        onClose={handleClose}
+        onSelect={handleMethodSelect}
+        methods={methods}
+      />
+      <Dialog open={open && !showSelector && selectedMethod !== null} onOpenChange={handleClose}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Transaction</DialogTitle>
+          </DialogHeader>
+          {selectedMethod && (
+            <TransactionForm
+              selectedMethod={selectedMethod}
+              onChangeMethod={handleChangeMethod}
+              onSubmit={handleSubmit}
+              onCancel={handleClose}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

@@ -7,4 +7,3 @@ export const userFormSchema = z.object({
   role: z.enum(["admin", "user"]).default("user"),
 })
 
-export type UserFormData = z.infer<typeof userFormSchema>

@@ -29,6 +29,34 @@
       "when": 1766363490234,
       "tag": "0003_common_iron_man",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767975133460,
+      "tag": "0004_breezy_silver_surfer",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1768436702672,
+      "tag": "0005_remarkable_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1768442551095,
+      "tag": "0006_romantic_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768451411044,
+      "tag": "0007_cold_kingpin",
+      "breakpoints": true
     }
   ]
 }
