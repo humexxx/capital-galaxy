@@ -16,7 +16,7 @@ export interface Transaction {
   total: string;
   date: Date;
   notes: string | null;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "closed";
   createdAt: Date | null;
   updatedAt: Date | null;
 }
@@ -26,7 +26,7 @@ export type AdminTransactionRow = {
   amount: string;
   total: string;
   date: Date;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "closed";
   type: "buy" | "withdrawal";
   notes: string | null;
   user: {

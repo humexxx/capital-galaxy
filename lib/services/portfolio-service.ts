@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { portfolios, transactions, investmentMethods } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import type { PortfolioTransaction, PortfolioStats, PortfolioAsset } from "@/types/portfolio";
 
 export async function getUserPortfolio(userId: string) {
@@ -22,31 +22,38 @@ export async function createPortfolio(userId: string, name?: string) {
 }
 
 export async function getPortfolioStats(portfolioId: string): Promise<PortfolioStats> {
-  const approvedTransactions = await db
+  // Get all approved buy transactions to calculate currentValue (totalValue) and initialValue (costBasis)
+  const buyTransactions = await db
     .select()
     .from(transactions)
     .where(
       and(
         eq(transactions.portfolioId, portfolioId),
-        eq(transactions.status, "approved")
+        eq(transactions.status, "approved"),
+        eq(transactions.type, "buy")
       )
     );
 
-  const totalInvested = approvedTransactions
-    .filter((t) => t.type === "buy")
-    .reduce((sum, t) => sum + parseFloat(t.total), 0);
+  // Calculate totalValue (sum of currentValue)
+  const totalValue = buyTransactions.reduce(
+    (sum, t) => sum + parseFloat(t.currentValue || "0"),
+    0
+  );
 
-  const totalWithdrawn = approvedTransactions
-    .filter((t) => t.type === "withdrawal")
-    .reduce((sum, t) => sum + parseFloat(t.total), 0);
+  // Calculate costBasis (sum of initialValue)
+  const costBasis = buyTransactions.reduce(
+    (sum, t) => sum + parseFloat(t.initialValue || "0"),
+    0
+  );
 
-  const costBasis = totalInvested - totalWithdrawn;
+  const allTimeProfit = totalValue - costBasis;
+  const allTimeProfitPercentage = costBasis > 0 ? (allTimeProfit / costBasis) * 100 : 0;
 
   return {
-    totalValue: costBasis,
+    totalValue,
     costBasis,
-    allTimeProfit: 0,
-    allTimeProfitPercentage: 0,
+    allTimeProfit,
+    allTimeProfitPercentage,
   };
 }
 
@@ -58,6 +65,8 @@ export async function getPortfolioTransactions(portfolioId: string): Promise<Por
       amount: transactions.amount,
       fee: transactions.fee,
       total: transactions.total,
+      initialValue: transactions.initialValue,
+      currentValue: transactions.currentValue,
       date: transactions.date,
       status: transactions.status,
       notes: transactions.notes,
@@ -83,6 +92,8 @@ export async function getPortfolioAssets(portfolioId: string): Promise<Portfolio
       type: transactions.type,
       amount: transactions.amount,
       total: transactions.total,
+      initialValue: transactions.initialValue,
+      currentValue: transactions.currentValue,
       status: transactions.status,
       investmentMethod: investmentMethods,
     })
@@ -106,6 +117,8 @@ export async function getPortfolioAssets(portfolioId: string): Promise<Portfolio
         approvedAmount: 0,
         pendingAmount: 0,
         hasPendingTransactions: false,
+        profitLoss: 0,
+        profitLossPercentage: 0,
       };
     }
 
@@ -113,13 +126,14 @@ export async function getPortfolioAssets(portfolioId: string): Promise<Portfolio
     
     if (transaction.status === "approved") {
       if (transaction.type === "buy") {
-        acc[methodId].totalInvested += amount;
-        acc[methodId].holdingAmount += amount;
-        acc[methodId].approvedAmount += amount;
+        const initialValue = parseFloat(transaction.initialValue || "0");
+        const currentValue = parseFloat(transaction.currentValue || "0");
+        
+        acc[methodId].totalInvested += initialValue;
+        acc[methodId].holdingAmount += currentValue;
+        acc[methodId].approvedAmount += currentValue;
       } else if (transaction.type === "withdrawal") {
         acc[methodId].totalWithdrawn += amount;
-        acc[methodId].holdingAmount -= amount;
-        acc[methodId].approvedAmount -= amount;
       }
     } else if (transaction.status === "pending") {
       acc[methodId].hasPendingTransactions = true;
@@ -133,5 +147,44 @@ export async function getPortfolioAssets(portfolioId: string): Promise<Portfolio
     return acc;
   }, {} as Record<string, PortfolioAsset>);
 
-  return Object.values(groupedAssets).filter((asset) => asset.holdingAmount > 0 || asset.pendingAmount > 0);
+  // Calculate profit/loss for each asset
+  const assets = Object.values(groupedAssets).map((asset) => {
+    const profitLoss = asset.holdingAmount - asset.totalInvested;
+    const profitLossPercentage = asset.totalInvested > 0 
+      ? (profitLoss / asset.totalInvested) * 100 
+      : 0;
+    
+    return {
+      ...asset,
+      profitLoss,
+      profitLossPercentage,
+    };
+  });
+
+  return assets.filter((asset) => asset.holdingAmount > 0 || asset.pendingAmount > 0);
+}
+
+/**
+ * Get current value and growth for a specific transaction
+ */
+export async function getTransactionCurrentValue(transactionId: string) {
+  const transaction = await db.query.transactions.findFirst({
+    where: eq(transactions.id, transactionId),
+  });
+
+  if (!transaction || transaction.type !== "buy") {
+    return null;
+  }
+
+  const initialValue = parseFloat(transaction.initialValue || "0");
+  const currentValue = parseFloat(transaction.currentValue || "0");
+  const growth = currentValue - initialValue;
+  const growthPercentage = initialValue > 0 ? (growth / initialValue) * 100 : 0;
+
+  return {
+    initialValue,
+    currentValue,
+    growth,
+    growthPercentage,
+  };
 }

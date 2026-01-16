@@ -6,7 +6,8 @@ import { Info } from "lucide-react";
 import { ChartConfig } from "@/types/chart";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { subDays } from "date-fns";
 
 const chartConfig = {
   value: {
@@ -24,6 +25,35 @@ type PerformanceChartProps = {
 
 export function PerformanceChart({ data }: PerformanceChartProps) {
   const [timeRange, setTimeRange] = useState("All");
+  
+  // Filter data based on time range
+  const filteredData = useMemo(() => {
+    if (timeRange === "All" || data.length === 0) {
+      return data;
+    }
+
+    const now = new Date();
+    let startDate: Date;
+
+    switch (timeRange) {
+      case "24h":
+        startDate = subDays(now, 1);
+        break;
+      case "7d":
+        startDate = subDays(now, 7);
+        break;
+      case "30d":
+        startDate = subDays(now, 30);
+        break;
+      case "90d":
+        startDate = subDays(now, 90);
+        break;
+      default:
+        return data;
+    }
+
+    return data.filter((point) => new Date(point.date) >= startDate);
+  }, [data, timeRange]);
   
   return (
     <Card className="col-span-2 bg-card">
@@ -47,10 +77,10 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
         </div>
       </CardHeader>
       <CardContent className="pl-0">
-        <ChartContainer config={chartConfig} className="h-[350px] w-full">
+        <ChartContainer config={chartConfig} className="h-87.5 w-full">
           <AreaChart
             accessibilityLayer
-            data={data}
+            data={filteredData}
             margin={{ left: 10, right: 10, top: 10, bottom: 0 }}
           >
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeDasharray="3 3" strokeOpacity={0.5} />

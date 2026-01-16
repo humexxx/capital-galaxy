@@ -32,7 +32,7 @@ type Transaction = {
   fee: string;
   total: string;
   date: Date;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "closed";
   notes?: string | null;
   investmentMethod: InvestmentMethod;
   asset_symbol?: string; // Assuming we might have this, or use name
@@ -131,7 +131,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-8 p-8 max-w-[1600px] mx-auto">
+      <div className="flex flex-1 flex-col gap-8 p-8 max-w-400 mx-auto">
 
         {/* Top Header Section */}
         <PortfolioHeader
@@ -176,7 +176,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
                   {data.chartData.length > 0 ? (
                     <PerformanceChart data={data.chartData} />
                   ) : (
-                    <Card className="h-[400px] flex items-center justify-center bg-card">
+                    <Card className="h-100 flex items-center justify-center bg-card">
                       <div className="text-center text-muted-foreground">
                         <p>Not enough data for chart</p>
                         <p className="text-sm">Approve transactions to see history</p>

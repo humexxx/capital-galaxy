@@ -25,8 +25,10 @@ type Transaction = {
   amount: string;
   fee: string;
   total: string;
+  initialValue?: string | null;
+  currentValue?: string | null;
   date: Date;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "closed";
   notes?: string | null;
   investmentMethod: InvestmentMethod;
 };
@@ -74,6 +76,8 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             <TableHead>Amount</TableHead>
             <TableHead>Fee</TableHead>
             <TableHead>Total</TableHead>
+            <TableHead>Initial Value</TableHead>
+            <TableHead>Current Value</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Notes</TableHead>
           </TableRow>
@@ -106,6 +110,34 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
               <TableCell>${parseFloat(transaction.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
               <TableCell>${parseFloat(transaction.fee).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
               <TableCell className="font-semibold">${parseFloat(transaction.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+              <TableCell>
+                {transaction.type === "buy" && transaction.initialValue ? (
+                  <span>${parseFloat(transaction.initialValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </TableCell>
+              <TableCell>
+                {transaction.type === "buy" && transaction.currentValue && transaction.initialValue ? (
+                  <div className="flex flex-col">
+                    <span className="font-medium">
+                      ${parseFloat(transaction.currentValue).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                    {(() => {
+                      const initial = parseFloat(transaction.initialValue);
+                      const current = parseFloat(transaction.currentValue);
+                      const growth = ((current - initial) / initial) * 100;
+                      return (
+                        <span className={`text-xs ${growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {growth >= 0 ? '+' : ''}{growth.toFixed(2)}%
+                        </span>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </TableCell>
               <TableCell>{getStatusBadge(transaction.status)}</TableCell>
               <TableCell>
                 {transaction.notes ? (

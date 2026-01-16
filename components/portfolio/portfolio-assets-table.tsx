@@ -28,6 +28,8 @@ type Asset = {
   approvedAmount: number;
   pendingAmount: number;
   hasPendingTransactions: boolean;
+  profitLoss: number;
+  profitLossPercentage: number;
 };
 
 type PortfolioAssetsTableProps = {
@@ -58,8 +60,8 @@ export function PortfolioAssetsTable({ assets }: PortfolioAssetsTableProps) {
         <TableBody>
           {assets.map((asset) => {
             const avgBuyPrice = asset.totalInvested;
-            const profitLoss = 0;
-            const profitLossPercentage = 0;
+            const profitLoss = asset.profitLoss;
+            const profitLossPercentage = asset.profitLossPercentage;
 
             return (
               <TableRow key={asset.investmentMethod.id}>

@@ -69,6 +69,42 @@ npm run dev          # Servidor de desarrollo
 npm run build        # Build de producción
 npm run start        # Servidor de producción
 npm run lint         # Linter
+npm run db:generate  # Generar migraciones de base de datos
+npm run db:migrate   # Aplicar migraciones de base de datos
+npm run db:studio    # Abrir Drizzle Studio para ver la BD
+```
+
+## ⚙️ Variables de Entorno
+
+Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=your_supabase_anon_key
+DATABASE_URL=your_database_url
+
+# Base URL
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Cron Secret (generar una cadena aleatoria segura)
+CRON_SECRET=your_secure_random_string
+```
+
+### Configuración de Cron Secret
+
+El `CRON_SECRET` se usa para proteger el endpoint del cron job diario que:
+- Crea snapshots diarios del portfolio
+- Aplica intereses compuestos mensuales el primer día de cada mes
+
+**En Vercel:**
+1. Ve a Project Settings → Environment Variables
+2. Agrega `CRON_SECRET` con un valor seguro aleatorio
+3. El cron job está configurado en `vercel.json` para ejecutarse diariamente a medianoche UTC
+
+**Para generar un CRON_SECRET seguro:**
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ## 🎨 Tema

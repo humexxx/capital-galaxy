@@ -1,8 +1,9 @@
 import { pgTable, text, uuid, timestamp, pgSchema, real, pgEnum, numeric } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);
 export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
-export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected"]);
+export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected", "closed"]);
 export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
 
 // Define auth schema to reference auth.users
@@ -55,6 +56,10 @@ export const transactions = pgTable("transactions", {
   amount: numeric("amount", { precision: 20, scale: 2 }).notNull(),
   fee: numeric("fee", { precision: 20, scale: 2 }).notNull().default("0"),
   total: numeric("total", { precision: 20, scale: 2 }).notNull(),
+  initialValue: numeric("initial_value", { precision: 20, scale: 2 }),
+  currentValue: numeric("current_value", { precision: 20, scale: 2 }),
+  sourceTransactionId: uuid("source_transaction_id"),
+  withdrawalTransactionIds: text("withdrawal_transaction_ids").array(),
   date: timestamp("date", { withTimezone: true }).notNull(),
   notes: text("notes"),
   status: transactionStatusEnum("status").notNull().default("pending"),
@@ -65,3 +70,32 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
+
+export const portfolioSnapshots = pgTable("portfolio_snapshots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  portfolioId: uuid("portfolio_id")
+    .notNull()
+    .references(() => portfolios.id, { onDelete: "cascade" }),
+  date: timestamp("date", { withTimezone: true }).notNull(),
+  totalValue: numeric("total_value", { precision: 20, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const appState = pgTable("app_state", {
+  key: text("key").primaryKey(),
+  value: text("value"),
+  error: text("error"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// Relations
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  investmentMethod: one(investmentMethods, {
+    fields: [transactions.investmentMethodId],
+    references: [investmentMethods.id],
+  }),
+  portfolio: one(portfolios, {
+    fields: [transactions.portfolioId],
+    references: [portfolios.id],
+  }),
+}));

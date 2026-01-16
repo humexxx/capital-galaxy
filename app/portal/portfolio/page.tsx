@@ -5,6 +5,7 @@ import {
   getPortfolioStats,
   getPortfolioTransactions,
 } from "@/lib/services/portfolio-service";
+import { getPortfolioPerformanceData } from "@/lib/services/chart-service";
 import { requireAuth } from "@/lib/services/auth-server";
 import type { PortfolioTransaction } from "@/types/portfolio";
 import PortfolioClientPage from "./portfolio-client";
@@ -23,23 +24,28 @@ export default async function PortfolioPage() {
     stats = await getPortfolioStats(portfolio.id);
     transactions = await getPortfolioTransactions(portfolio.id);
 
-    // Generate chart data from approved transactions
-    const approvedTransactions = transactions.filter(
-      (t) => t.status === "approved"
-    );
-    if (approvedTransactions.length > 0) {
-      let runningTotal = 0;
-      chartData = approvedTransactions.map((t) => {
-        if (t.type === "buy") {
-          runningTotal += parseFloat(t.total);
-        } else {
-          runningTotal -= parseFloat(t.total);
-        }
-        return {
-          date: new Date(t.date).toLocaleDateString(),
-          value: runningTotal,
-        };
-      });
+    // Get real snapshot data for chart
+    chartData = await getPortfolioPerformanceData(portfolio.id, "All");
+    
+    // Fallback: Generate chart data from approved transactions if no snapshots exist
+    if (chartData.length === 0) {
+      const approvedTransactions = transactions.filter(
+        (t) => t.status === "approved"
+      );
+      if (approvedTransactions.length > 0) {
+        let runningTotal = 0;
+        chartData = approvedTransactions.map((t) => {
+          if (t.type === "buy") {
+            runningTotal += parseFloat(t.total);
+          } else {
+            runningTotal -= parseFloat(t.total);
+          }
+          return {
+            date: new Date(t.date).toISOString(),
+            value: runningTotal,
+          };
+        });
+      }
     }
   }
 

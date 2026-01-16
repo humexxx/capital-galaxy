@@ -18,8 +18,10 @@ export interface PortfolioTransaction {
   amount: string;
   fee: string;
   total: string;
+  initialValue: string | null;
+  currentValue: string | null;
   date: Date;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "closed";
   notes: string | null;
   investmentMethod: typeof investmentMethods.$inferSelect;
 }
@@ -33,4 +35,6 @@ export interface PortfolioAsset {
   approvedAmount: number;
   pendingAmount: number;
   hasPendingTransactions: boolean;
+  profitLoss: number;
+  profitLossPercentage: number;
 }
