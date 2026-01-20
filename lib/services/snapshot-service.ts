@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { portfolioSnapshots, transactions } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import type { SnapshotSource } from "@/types";
+import type { SnapshotSource } from "@/schemas/snapshot";
 
 /**
  * Create daily snapshots for all portfolios with approved transactions
@@ -45,15 +45,19 @@ export async function createDailySnapshots() {
  * Does NOT delete existing snapshots - allows multiple snapshots per day
  */
 export async function createApprovalSnapshot(portfolioId: string) {
-  await createSnapshotForPortfolio(portfolioId, "system_approval");
+  await createSnapshotForPortfolio(portfolioId, "admin_approval");
 }
 
 /**
  * Create a manual snapshot for a portfolio
  * Used by users to take a manual snapshot
  */
-export async function createManualSnapshot(portfolioId: string) {
-  return await createSnapshotForPortfolio(portfolioId, "manual");
+export async function createManualSnapshot(
+  portfolioId: string,
+  date: Date = new Date(),
+  source: SnapshotSource = "manual"
+) {
+  return await createSnapshotForPortfolio(portfolioId, source, date);
 }
 
 /**
@@ -77,7 +81,8 @@ export async function deleteManualSnapshots(portfolioId: string) {
  */
 async function createSnapshotForPortfolio(
   portfolioId: string,
-  source: SnapshotSource
+  source: SnapshotSource,
+  date: Date = new Date()
 ): Promise<{ created: boolean; totalValue: number }> {
   // Sum currentValue of all approved buy transactions
   const result = await db
@@ -114,7 +119,7 @@ async function createSnapshotForPortfolio(
   if (shouldCreate) {
     await db.insert(portfolioSnapshots).values({
       portfolioId,
-      date: new Date(),
+      date,
       totalValue: totalValue.toFixed(2),
       source,
     });

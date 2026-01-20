@@ -14,6 +14,14 @@
   - Not used anywhere else in the codebase
 - Export commonly used types from `/types/index.ts` for easy imports
 
+## Validation Schemas
+
+- **Place Zod validation schemas in `/schemas` folder** for all forms and data validation
+- **Define associated TypeScript types in the same schema file** using `z.infer<typeof schema>`
+- Keep schema-related types with their schemas rather than in `/types` folder
+- Use consistent naming: `[name]Schema` for schemas, `[Name]Data` for inferred types
+- Export both the schema and its type from the schema file
+
 ## Database Schema Changes
 
 When modifying database schemas in `db/schema.ts`:
@@ -27,6 +35,7 @@ When modifying database schemas in `db/schema.ts`:
 - **Keep functions simple**: Extract complex logic into smaller, focused functions
 - **Use meaningful names**: Function and variable names should clearly describe their purpose
 - **Avoid `any` type**: Always define proper TypeScript types and interfaces. Use `unknown` if the type is truly unknown, then narrow it with type guards
+- **Consult official documentation**: When using major libraries (Zod, Drizzle, React Hook Form, etc.), always reference their official documentation for the correct API usage and avoid deprecated methods
 
 ## Project Structure
 
@@ -34,9 +43,9 @@ When modifying database schemas in `db/schema.ts`:
 - `/app/api` - API routes
 - `/components` - React components
 - `/lib/services` - Business logic and data services
-- `/types` - Shared TypeScript types and interfaces
+- `/types` - Shared TypeScript types and interfaces (excludes schema-related types)
 - `/db` - Database schema and migrations
-- `/schemas` - Zod validation schemas
+- `/schemas` - Zod validation schemas with their TypeScript types
 
 ## Database Patterns
 

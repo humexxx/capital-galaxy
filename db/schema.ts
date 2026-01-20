@@ -5,7 +5,7 @@ export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);
 export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
 export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected", "closed"]);
 export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
-export const snapshotSourceEnum = pgEnum("snapshot_source", ["system_cron", "system_approval", "manual"]);
+export const snapshotSourceEnum = pgEnum("snapshot_source", ["system_cron", "admin_approval", "manual", "admin_enforce"]);
 
 // Define auth schema to reference auth.users
 const authSchema = pgSchema("auth");

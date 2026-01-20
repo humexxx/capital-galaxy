@@ -1,4 +1,4 @@
-export type SnapshotSource = "system_cron" | "system_approval" | "manual";
+import type { SnapshotSource } from "@/schemas/snapshot";
 
 export interface PortfolioSnapshot {
   id: string;

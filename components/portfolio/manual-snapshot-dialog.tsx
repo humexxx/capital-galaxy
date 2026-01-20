@@ -10,11 +10,32 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Field,
+  FieldGroup,
+  FieldLabel,
+  FieldDescription,
+} from "@/components/ui/field";
 import { createManualSnapshotAction } from "@/app/actions/portfolio-snapshots";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import type { SnapshotSource } from "@/schemas/snapshot";
 
 interface ManualSnapshotDialogProps {
   open: boolean;
@@ -22,7 +43,9 @@ interface ManualSnapshotDialogProps {
 }
 
 export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialogProps) {
+  const [date, setDate] = useState<Date>(new Date());
   const [applyInterest, setApplyInterest] = useState(false);
+  const [source, setSource] = useState<SnapshotSource>("manual");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -30,7 +53,11 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
     try {
       setIsLoading(true);
 
-      const result = await createManualSnapshotAction(applyInterest);
+      const result = await createManualSnapshotAction({
+        date,
+        applyInterest,
+        source,
+      });
 
       toast.success(
         `Snapshot created successfully. Total value: $${result.totalValue.toFixed(2)}`
@@ -52,26 +79,74 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
         <DialogHeader>
           <DialogTitle>Create Manual Snapshot</DialogTitle>
           <DialogDescription>
-            Create a snapshot of your portfolio&apos;s current value. Optionally, you can apply
-            monthly interest before taking the snapshot.
+            Create a snapshot of your portfolio&apos;s current value with custom settings.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="space-y-1">
-            <Label htmlFor="apply-interest">Apply monthly interest</Label>
-            <p className="text-sm text-muted-foreground">
-              Calculate and apply compound interest to all active investments before
-              creating the snapshot.
-            </p>
-          </div>
-          <Switch
-            id="apply-interest"
-            checked={applyInterest}
-            onCheckedChange={setApplyInterest}
-            disabled={isLoading}
-          />
-        </div>
+        <FieldGroup>
+          <Field>
+            <FieldLabel>Snapshot Date</FieldLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {format(date, "MMM d, yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => d && setDate(d)}
+                  autoFocus
+                  disabled={isLoading}
+                />
+              </PopoverContent>
+            </Popover>
+            <FieldDescription>
+              The date for this snapshot record
+            </FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="source">Snapshot Type</FieldLabel>
+            <Select
+              value={source}
+              onValueChange={(value) => setSource(value as SnapshotSource)}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="manual">Manual</SelectItem>
+                <SelectItem value="admin_enforce">Admin Enforce (Protected)</SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>
+              Admin Enforce snapshots won&apos;t be deleted when clearing manual snapshots
+            </FieldDescription>
+          </Field>
+
+          <Field orientation="horizontal">
+            <div className="space-y-1">
+              <FieldLabel htmlFor="apply-interest">Apply monthly interest</FieldLabel>
+              <FieldDescription>
+                Calculate and apply compound interest to all active investments before
+                creating the snapshot
+              </FieldDescription>
+            </div>
+            <Switch
+              id="apply-interest"
+              checked={applyInterest}
+              onCheckedChange={setApplyInterest}
+              disabled={isLoading}
+            />
+          </Field>
+        </FieldGroup>
 
         <DialogFooter className="sm:justify-between">
           <Button

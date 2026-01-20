@@ -7,14 +7,18 @@ import { applyMonthlyInterest } from "@/lib/services/interest-service";
 import { revalidatePath } from "next/cache";
 import { portfolios } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { manualSnapshotFormSchema, type ManualSnapshotFormData } from "@/schemas/snapshot";
 
 /**
  * Create a manual snapshot for the user's portfolio
  * Optionally applies monthly interest before taking the snapshot
  * Admin only
  */
-export async function createManualSnapshotAction(applyInterest: boolean) {
+export async function createManualSnapshotAction(data: ManualSnapshotFormData) {
   const admin = await requireAdmin();
+
+  // Validate input
+  const validated = manualSnapshotFormSchema.parse(data);
 
   // Get user's portfolio
   const portfolio = await db.query.portfolios.findFirst({
@@ -27,12 +31,12 @@ export async function createManualSnapshotAction(applyInterest: boolean) {
 
   try {
     // Apply interest if requested
-    if (applyInterest) {
+    if (validated.applyInterest) {
       await applyMonthlyInterest();
     }
 
     // Create manual snapshot
-    const result = await createManualSnapshot(portfolio.id);
+    const result = await createManualSnapshot(portfolio.id, validated.date, validated.source);
 
     if (!result.created) {
       throw new Error("Snapshot not created - portfolio has no value and no previous snapshots");
