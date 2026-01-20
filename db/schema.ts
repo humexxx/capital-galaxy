@@ -5,6 +5,7 @@ export const userRoleEnum = pgEnum("user_role", ["admin", "user"]);
 export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
 export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected", "closed"]);
 export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
+export const snapshotSourceEnum = pgEnum("snapshot_source", ["system_cron", "system_approval", "manual"]);
 
 // Define auth schema to reference auth.users
 const authSchema = pgSchema("auth");
@@ -78,6 +79,7 @@ export const portfolioSnapshots = pgTable("portfolio_snapshots", {
     .references(() => portfolios.id, { onDelete: "cascade" }),
   date: timestamp("date", { withTimezone: true }).notNull(),
   totalValue: numeric("total_value", { precision: 20, scale: 2 }).notNull(),
+  source: snapshotSourceEnum("source").notNull().default("system_cron"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

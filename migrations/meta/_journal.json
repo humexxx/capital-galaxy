@@ -57,6 +57,13 @@
       "when": 1768451411044,
       "tag": "0007_cold_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1768927056337,
+      "tag": "0008_colorful_wallow",
+      "breakpoints": true
     }
   ]
 }
