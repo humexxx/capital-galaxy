@@ -52,6 +52,12 @@ type ChartDataPoint = {
   value: number;
 };
 
+type User = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+};
+
 type PortfolioData = {
   portfolio: Portfolio | null;
   stats: PortfolioStats | null;
@@ -59,6 +65,7 @@ type PortfolioData = {
   chartData: ChartDataPoint[];
   methods: InvestmentMethod[];
   isAdmin: boolean;
+  users?: User[];
 };
 
 export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
@@ -94,6 +101,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
     amount: string;
     date: Date;
     notes?: string;
+    userId?: string;
   }) => {
     try {
       const response = await fetch("/api/transactions", {
@@ -121,6 +129,8 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
           onClose={() => setIsDialogOpen(false)}
           methods={data.methods}
           onSubmit={handleAddTransaction}
+          isAdmin={data.isAdmin}
+          users={data.users}
         />
       </>
     );
@@ -215,6 +225,8 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
         onClose={() => setIsDialogOpen(false)}
         methods={data.methods}
         onSubmit={handleAddTransaction}
+        isAdmin={data.isAdmin}
+        users={data.users}
       />
     </>
   );

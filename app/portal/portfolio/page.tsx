@@ -7,6 +7,7 @@ import {
 } from "@/lib/services/portfolio-service";
 import { getPortfolioPerformanceData } from "@/lib/services/chart-service";
 import { requireAuth, getUserRole } from "@/lib/services/auth-server";
+import { getAllUsers } from "@/lib/services/user-service";
 import type { PortfolioTransaction } from "@/types/portfolio";
 import PortfolioClientPage from "./portfolio-client";
 
@@ -17,6 +18,7 @@ export default async function PortfolioPage() {
 
   const portfolio = await getUserPortfolio(user.id);
   const methods = await db.select().from(investmentMethods);
+  const users = isAdmin ? await getAllUsers() : [];
 
   let stats = null;
   let transactions: PortfolioTransaction[] = [];
@@ -58,6 +60,7 @@ export default async function PortfolioPage() {
     chartData,
     methods,
     isAdmin,
+    users,
   };
 
   return <PortfolioClientPage data={data} />;

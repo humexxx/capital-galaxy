@@ -26,6 +26,7 @@ When modifying database schemas in `db/schema.ts`:
 
 - **Keep functions simple**: Extract complex logic into smaller, focused functions
 - **Use meaningful names**: Function and variable names should clearly describe their purpose
+- **Avoid `any` type**: Always define proper TypeScript types and interfaces. Use `unknown` if the type is truly unknown, then narrow it with type guards
 
 ## Project Structure
 

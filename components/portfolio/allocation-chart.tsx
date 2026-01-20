@@ -1,9 +1,10 @@
 "use client";
 
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig } from "@/types/chart";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Pie, PieChart, LabelList } from "recharts";
+import { Pie, PieChart, Label } from "recharts";
 
 const chartConfig = {
   value: {
@@ -11,8 +12,16 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function AllocationChart({ data }: { data?: any[] }) {
-  const chartData = data || [];
+interface AllocationData {
+  name: string;
+  value: number;
+}
+
+export function AllocationChart({ data }: { data?: AllocationData[] }) {
+  const chartData = (data || []).map((item, index) => ({
+    ...item,
+    fill: `var(--chart-${(index % 5) + 1})`,
+  }));
 
   // Build dynamic config from data
   const dynamicConfig = chartData.reduce((acc, item, index) => {
@@ -23,6 +32,10 @@ export function AllocationChart({ data }: { data?: any[] }) {
     return acc;
   }, {} as Record<string, { label: string; color: string }>);
 
+  const totalValue = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [chartData]);
+
   return (
     <Card className="col-span-1 bg-card h-full flex flex-col">
       <CardHeader>
@@ -31,18 +44,48 @@ export function AllocationChart({ data }: { data?: any[] }) {
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={{ ...chartConfig, ...dynamicConfig }}
-          className="mx-auto aspect-square max-h-[250px]"
+          className="mx-auto aspect-square max-h-[350px] p-6"
         >
           <PieChart>
             <ChartTooltip
-              content={<ChartTooltipContent nameKey="value" hideLabel />}
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Pie data={chartData} dataKey="value">
-              <LabelList
-                dataKey="name"
-                className="fill-background"
-                stroke="none"
-                fontSize={12}
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={85}
+              strokeWidth={5}
+            >
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-3xl font-bold"
+                        >
+                          ${totalValue.toLocaleString()}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Total
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
               />
             </Pie>
           </PieChart>
