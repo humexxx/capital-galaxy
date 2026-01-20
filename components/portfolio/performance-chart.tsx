@@ -108,7 +108,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
             />
             <Area
               dataKey="value"
-              type="natural"
+              type="bump"
               fill="var(--color-value)"
               fillOpacity={0.4}
               stroke="var(--color-value)"

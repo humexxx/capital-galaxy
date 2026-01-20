@@ -56,6 +56,7 @@ type PortfolioData = {
   transactions: Transaction[];
   chartData: ChartDataPoint[];
   methods: InvestmentMethod[];
+  isAdmin: boolean;
 };
 
 export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
@@ -144,6 +145,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
           onToggleCharts={() => setShowCharts(!showCharts)}
           hideValues={hideValues}
           onToggleHideValues={() => setHideValues(!hideValues)}
+          isAdmin={data.isAdmin}
         />
 
         {/* Tabs and Content */}
