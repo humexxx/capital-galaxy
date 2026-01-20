@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { AddTransactionDialog } from "@/components/portfolio/add-transaction-dialog";
 import { TransactionsTable } from "@/components/portfolio/transactions-table";
@@ -136,12 +135,6 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
     );
   }
 
-  // Calculate daily change (mocked for now as we don't have historical snapshot in stats)
-  // For now, assuming daily change is 0 or part of allTimeProfit if implied.
-  // The image shows specific 24h change. We'll pass 0 if not available.
-  const dailyChange = 0;
-  const dailyChangePercentage = 0;
-
   return (
     <>
       <div className="flex flex-1 flex-col gap-8 p-8 max-w-400 mx-auto">
@@ -150,8 +143,6 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
         <PortfolioHeader
           portfolioName={data.portfolio.name}
           totalValue={data.stats?.totalValue || 0}
-          dailyChange={dailyChange}
-          dailyChangePercentage={dailyChangePercentage}
           onAddTransaction={() => setIsDialogOpen(true)}
           showCharts={showCharts}
           onToggleCharts={() => setShowCharts(!showCharts)}

@@ -9,7 +9,6 @@ import {
   Plus,
   Download,
   MoreHorizontal,
-  TrendingUp,
   Camera,
   Trash2,
 } from "lucide-react";
@@ -33,8 +32,6 @@ import {
 type PortfolioHeaderProps = {
   portfolioName: string;
   totalValue: number;
-  dailyChange: number;
-  dailyChangePercentage: number;
   onAddTransaction: () => void;
   showCharts: boolean;
   onToggleCharts: () => void;
@@ -46,8 +43,6 @@ type PortfolioHeaderProps = {
 export function PortfolioHeader({
   portfolioName,
   totalValue,
-  dailyChange,
-  dailyChangePercentage,
   onAddTransaction,
   showCharts,
   onToggleCharts,
@@ -55,7 +50,6 @@ export function PortfolioHeader({
   onToggleHideValues,
   isAdmin,
 }: PortfolioHeaderProps) {
-  const isProfit = dailyChange >= 0;
   const [isSnapshotDialogOpen, setIsSnapshotDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -113,28 +107,6 @@ export function PortfolioHeader({
                   <Eye className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-foreground" />
                 )}
               </button>
-            </div>
-            <div
-              className={`flex items-center gap-2 text-sm font-medium ${
-                isProfit ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              <span>
-                {hideValues
-                  ? "****"
-                  : `${isProfit ? "+" : "-"}$${Math.abs(
-                      dailyChange
-                    ).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}`}
-              </span>
-              <div className="flex items-center">
-                <TrendingUp
-                  className={`w-3 h-3 mr-1 ${!isProfit && "rotate-180"}`}
-                />
-                {Math.abs(dailyChangePercentage).toFixed(2)}% (24h)
-              </div>
             </div>
           </div>
         </div>
