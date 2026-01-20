@@ -64,6 +64,13 @@
       "when": 1768927056337,
       "tag": "0008_colorful_wallow",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1768951788223,
+      "tag": "0009_giant_invaders",
+      "breakpoints": true
     }
   ]
 }

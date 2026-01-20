@@ -30,6 +30,14 @@ When modifying database schemas in `db/schema.ts`:
 2. **Apply migration**: Run `npm run db:migrate` to apply changes to the database
 3. Always commit both the schema changes and generated migration files together
 
+## UI Components
+
+- **Always use shadcn/ui components** when building UI elements
+- Check `/components/ui` folder for available shadcn components before creating custom UI elements
+- Follow shadcn/ui patterns: composable, accessible, and customizable components
+- Maintain consistent styling using Tailwind CSS utilities and CSS variables
+- Prefer minimalist designs that align with shadcn/ui's design philosophy
+
 ## Code Quality
 
 - **Keep functions simple**: Extract complex logic into smaller, focused functions

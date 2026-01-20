@@ -120,7 +120,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
   if (!data.portfolio) {
     return (
       <>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex flex-1 flex-col">
           <EmptyPortfolio onAddTransaction={() => setIsDialogOpen(true)} />
         </div>
         <AddTransactionDialog
