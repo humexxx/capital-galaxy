@@ -184,7 +184,8 @@ export function TransactionForm({
                     mode="single"
                     selected={date}
                     onSelect={(d) => d && setDate(d)}
-                    initialFocus
+                    autoFocus
+                    disabled={(date) => date > new Date()}
                   />
                 </PopoverContent>
               </Popover>

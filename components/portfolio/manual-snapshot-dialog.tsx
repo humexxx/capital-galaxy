@@ -102,7 +102,10 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
                   selected={date}
                   onSelect={(d) => d && setDate(d)}
                   autoFocus
-                  disabled={isLoading}
+                  disabled={(date) => {
+                    if (isLoading) return true;
+                    return date > new Date();
+                  }}
                 />
               </PopoverContent>
             </Popover>
