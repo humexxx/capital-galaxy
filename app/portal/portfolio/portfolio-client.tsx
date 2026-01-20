@@ -43,6 +43,8 @@ type PortfolioStats = {
   costBasis: number;
   allTimeProfit: number;
   allTimeProfitPercentage: number;
+  totalInvestmentMethods: number;
+  activeTransactions: number;
 };
 
 type ChartDataPoint = {
@@ -164,9 +166,9 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
                 allTimeProfit={data.stats.allTimeProfit}
                 allTimeProfitPercentage={data.stats.allTimeProfitPercentage}
                 costBasis={data.stats.costBasis}
+                totalInvestmentMethods={data.stats.totalInvestmentMethods}
+                activeTransactions={data.stats.activeTransactions}
                 hideValues={hideValues}
-              // Best/Worst performers could be calculated from allocationData if we tracked cost basis per asset
-              // For now passing undefined or simple placeholders if we can't derive easily
               />
             )}
 

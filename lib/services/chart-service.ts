@@ -1,9 +1,9 @@
 import { db } from "@/db";
 import { portfolioSnapshots, transactions } from "@/db/schema";
 import { eq, and, gte, asc } from "drizzle-orm";
-import { subDays, subMonths } from "date-fns";
+import { subDays, subMonths, startOfMonth, getDate } from "date-fns";
 
-export type TimeRange = "24h" | "7d" | "30d" | "90d" | "All";
+export type TimeRange = "30d" | "90d" | "120d" | "1yr" | "All";
 
 export interface ChartDataPoint {
   date: string;
@@ -24,17 +24,17 @@ export async function getPortfolioPerformanceData(
 
   // Calculate start date based on time range
   switch (timeRange) {
-    case "24h":
-      startDate = subDays(now, 1);
-      break;
-    case "7d":
-      startDate = subDays(now, 7);
-      break;
     case "30d":
       startDate = subDays(now, 30);
       break;
     case "90d":
       startDate = subDays(now, 90);
+      break;
+    case "120d":
+      startDate = subDays(now, 120);
+      break;
+    case "1yr":
+      startDate = subDays(now, 365);
       break;
     case "All":
       startDate = null; // Get all data
@@ -73,24 +73,22 @@ export async function getPortfolioPerformanceData(
     value: parseFloat(snapshot.totalValue),
   }));
 
-  // If we have snapshots, add a dummy point 1 month before first transaction
+  // If we have snapshots, add a dummy point at the start of current month (or previous month if today is day 1)
   if (chartData.length > 0) {
-    // Get first approved transaction date for this portfolio
-    const firstTransaction = await db.query.transactions.findFirst({
-      where: eq(transactions.portfolioId, portfolioId),
-      orderBy: [asc(transactions.date)],
+    const now = new Date();
+    const isFirstDayOfMonth = getDate(now) === 1;
+    
+    // If today is the first day of the month, use first day of previous month
+    // Otherwise use first day of current month
+    const dummyPointDate = isFirstDayOfMonth 
+      ? startOfMonth(subMonths(now, 1))
+      : startOfMonth(now);
+    
+    // Insert at the beginning
+    chartData.unshift({
+      date: dummyPointDate.toISOString(),
+      value: 0,
     });
-
-    if (firstTransaction) {
-      // Add a point 1 month before the first transaction with value 0
-      const oneMonthBefore = subMonths(new Date(firstTransaction.date), 1);
-      
-      // Insert at the beginning
-      chartData.unshift({
-        date: oneMonthBefore.toISOString(),
-        value: 0,
-      });
-    }
   }
 
   return chartData;
