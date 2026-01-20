@@ -30,17 +30,11 @@ export async function createManualSnapshotAction(data: ManualSnapshotFormData) {
   }
 
   try {
-    // Apply interest if requested
     if (validated.applyInterest) {
-      await applyMonthlyInterest();
+      await applyMonthlyInterest(validated.date);
     }
 
-    // Create manual snapshot
     const result = await createManualSnapshot(portfolio.id, validated.date, validated.source);
-
-    if (!result.created) {
-      throw new Error("Snapshot not created - portfolio has no value and no previous snapshots");
-    }
 
     revalidatePath("/portal/portfolio");
 

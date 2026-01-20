@@ -44,6 +44,7 @@ When modifying database schemas in `db/schema.ts`:
 - **Use meaningful names**: Function and variable names should clearly describe their purpose
 - **Avoid `any` type**: Always define proper TypeScript types and interfaces. Use `unknown` if the type is truly unknown, then narrow it with type guards
 - **Consult official documentation**: When using major libraries (Zod, Drizzle, React Hook Form, etc.), always reference their official documentation for the correct API usage and avoid deprecated methods
+- **Minimal comments**: Avoid excessive JSDoc or inline comments. Only add comments when truly necessary to explain complex business logic or non-obvious decisions. Let clean, self-documenting code speak for itself
 
 ## Project Structure
 

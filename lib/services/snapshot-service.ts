@@ -100,18 +100,19 @@ async function createSnapshotForPortfolio(
 
   const totalValue = parseFloat(result[0]?.totalValue || "0");
 
-  // Check if we should create a snapshot
   let shouldCreate = totalValue > 0;
 
-  // If totalValue is 0, check if previous snapshot had value > 0
-  // to show the portfolio went to 0
   if (totalValue === 0) {
     const lastSnapshot = await db.query.portfolioSnapshots.findFirst({
       where: eq(portfolioSnapshots.portfolioId, portfolioId),
       orderBy: (snapshots, { desc }) => [desc(snapshots.date)],
     });
 
-    if (lastSnapshot && parseFloat(lastSnapshot.totalValue) > 0) {
+    const lastValue = lastSnapshot ? parseFloat(lastSnapshot.totalValue) : null;
+
+    if (lastValue !== null && lastValue > 0) {
+      shouldCreate = true;
+    } else if ((source === "manual" || source === "admin_enforce") && lastValue !== 0) {
       shouldCreate = true;
     }
   }

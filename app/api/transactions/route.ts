@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createTransaction } from "@/lib/services/transaction-service";
 import { getCurrentUser, getUserRole } from "@/lib/services/auth-server";
+import { createApprovalSnapshot } from "@/lib/services/snapshot-service";
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
     }
 
     const role = await getUserRole(user.id);
+    const isAdmin = role === "admin";
     const body = await request.json();
     const { investmentMethodId, amount, date, notes, userId } = body;
 
@@ -21,12 +23,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Determine target user ID
     let targetUserId = user.id;
     
     if (userId) {
-      // If userId is provided, user must be admin
-      if (role !== "admin") {
+      if (!isAdmin) {
         return NextResponse.json(
           { error: "Forbidden: Only admins can create transactions for other users" },
           { status: 403 }
@@ -35,12 +35,10 @@ export async function POST(request: Request) {
       targetUserId = userId;
     }
 
-    // Validate date: non-admin users can only create transactions with current date
     const transactionDate = new Date(date);
     const now = new Date();
     
-    if (role !== "admin") {
-      // Allow small time difference (within same day accounting for timezone)
+    if (!isAdmin) {
       const daysDifference = Math.abs(
         (transactionDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
       );
@@ -52,17 +50,20 @@ export async function POST(request: Request) {
         );
       }
       
-      // Force the date to be now for non-admin users
       transactionDate.setTime(now.getTime());
     }
 
-    const transaction = await createTransaction(targetUserId, {
+    const { transaction, portfolio } = await createTransaction(targetUserId, {
       investmentMethodId,
       type: "buy",
       amount,
       date: transactionDate,
       notes,
-    });
+    }, isAdmin);
+
+    if (isAdmin && transaction.status === "approved") {
+      await createApprovalSnapshot(portfolio.id);
+    }
 
     return NextResponse.json(transaction);
   } catch (error) {

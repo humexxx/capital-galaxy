@@ -1,20 +1,29 @@
 import { db } from "@/db";
 import { transactions } from "@/db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, lte } from "drizzle-orm";
 
 /**
  * Apply monthly compound interest to all active transactions
  * Updates currentValue = currentValue * (1 + monthlyRoi)
  * Marks transactions with currentValue <= 0 as 'closed'
+ * @param beforeDate - Optional date to only apply interest to transactions created before this date
  */
-export async function applyMonthlyInterest() {
+export async function applyMonthlyInterest(beforeDate?: Date) {
+  // Build where conditions
+  const conditions = [
+    eq(transactions.status, "approved"),
+    eq(transactions.type, "buy"),
+    gt(transactions.currentValue, "0"),
+  ];
+
+  // Only include transactions created before the specified date
+  if (beforeDate) {
+    conditions.push(lte(transactions.date, beforeDate));
+  }
+
   // Get all active buy transactions with their investment method's monthlyRoi
   const activeTransactions = await db.query.transactions.findMany({
-    where: and(
-      eq(transactions.status, "approved"),
-      eq(transactions.type, "buy"),
-      gt(transactions.currentValue, "0")
-    ),
+    where: and(...conditions),
     with: {
       investmentMethod: true,
     },
