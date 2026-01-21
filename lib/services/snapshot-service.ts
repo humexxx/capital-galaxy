@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { portfolioSnapshots, transactions } from "@/db/schema";
-import { eq, and, sql, lte } from "drizzle-orm";
+import { eq, and, sql, lte, gt } from "drizzle-orm";
 import type { SnapshotSource } from "@/schemas/snapshot";
 
 /**
@@ -85,10 +85,11 @@ async function createSnapshotForPortfolio(
   source: SnapshotSource,
   date: Date = new Date()
 ): Promise<{ created: boolean; totalValue: number }> {
-  // Sum currentValue of all approved buy transactions with date <= snapshot date
+  // Count and sum currentValue of all approved buy transactions with date <= snapshot date
   const result = await db
     .select({
       totalValue: sql<string>`COALESCE(SUM(${transactions.currentValue}), 0)`,
+      count: sql<number>`COUNT(*)`,
     })
     .from(transactions)
     .where(
@@ -101,6 +102,38 @@ async function createSnapshotForPortfolio(
     );
 
   const totalValue = parseFloat(result[0]?.totalValue || "0");
+  const transactionCount = result[0]?.count || 0;
+
+  // Skip if no transactions match the criteria (date filter)
+  if (transactionCount === 0) {
+    return { created: false, totalValue: 0 };
+  }
+
+  // If totalValue is 0, check if there are transactions after this date
+  // Only create 0-value snapshot if this represents a real state (had value before or will have after)
+  if (totalValue === 0) {
+    const futureTransactions = await db
+      .select({
+        count: sql<number>`COUNT(*)`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.portfolioId, portfolioId),
+          eq(transactions.status, "approved"),
+          eq(transactions.type, "buy"),
+          gt(transactions.date, date)
+        )
+      );
+
+    const hasFutureTransactions = (futureTransactions[0]?.count || 0) > 0;
+
+    // Skip snapshot if value is 0 and there are future transactions
+    // (means we're creating a snapshot before any transactions existed)
+    if (hasFutureTransactions) {
+      return { created: false, totalValue: 0 };
+    }
+  }
 
   let shouldCreate = totalValue > 0;
 

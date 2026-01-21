@@ -75,8 +75,12 @@ export async function getPortfolioPerformanceData(
 
   if (chartData.length > 0) {
     // If there are snapshots, add dummy point at day 1 of the first snapshot's month
+    // If the first snapshot is on day 1, use day 1 of the previous month
     const firstSnapshotDate = new Date(chartData[0].date);
-    const dummyStartDate = startOfMonth(firstSnapshotDate);
+    const isFirstDayOfMonth = getDate(firstSnapshotDate) === 1;
+    const dummyStartDate = isFirstDayOfMonth
+      ? startOfMonth(subMonths(firstSnapshotDate, 1))
+      : startOfMonth(firstSnapshotDate);
     
     // Insert the dummy point at the beginning with value 0
     chartData.unshift({

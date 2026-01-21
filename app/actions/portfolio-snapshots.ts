@@ -59,26 +59,27 @@ export async function createManualSnapshotAction(data: ManualSnapshotFormData) {
 }
 
 /**
- * Delete all manual snapshots for the user's portfolio
+ * Delete all manual snapshots from ALL portfolios
  * Admin only
  */
 export async function deleteManualSnapshotsAction() {
-  const admin = await requireAdmin();
+  await requireAdmin();
 
-  // Get user's portfolio
-  const portfolio = await db.query.portfolios.findFirst({
-    where: eq(portfolios.userId, admin.id),
-  });
-
-  if (!portfolio) {
-    throw new Error("Portfolio not found");
-  }
+  // Get all portfolios
+  const allPortfolios = await db.query.portfolios.findMany();
 
   try {
-    await deleteManualSnapshots(portfolio.id);
+    let totalDeleted = 0;
+
+    // Delete manual snapshots from each portfolio
+    for (const portfolio of allPortfolios) {
+      await deleteManualSnapshots(portfolio.id);
+      totalDeleted++;
+    }
+
     revalidatePath("/portal/portfolio");
 
-    return { success: true };
+    return { success: true, portfoliosProcessed: totalDeleted };
   } catch (error) {
     console.error("Error deleting manual snapshots:", error);
     throw error;

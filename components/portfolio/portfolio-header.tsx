@@ -74,12 +74,12 @@ export function PortfolioHeader({
       await deleteManualSnapshotsAction();
       toast.success("Manual snapshots deleted successfully");
       router.refresh();
-      setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting snapshots:", error);
       toast.error("Error deleting snapshots");
     } finally {
       setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -172,11 +172,11 @@ export function PortfolioHeader({
 
               <Button
                 variant="outline"
-                className="gap-2 bg-background"
+                className="gap-2"
                 onClick={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2 className="w-4 h-4" />
-                Delete Snapshots
+                Clear Manual Snapshots
               </Button>
             </div>
           </AdminOnly>
@@ -194,19 +194,20 @@ export function PortfolioHeader({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Clear Manual Snapshots</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will delete all manually created snapshots.
-              System-generated snapshots will not be affected.
+              This will permanently delete all manual snapshots from your portfolio. 
+              Snapshots created by the system or through transaction approvals will remain intact.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              variant={'destructive'}
               onClick={handleDeleteSnapshots}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "Clearing..." : "Clear All Manual Snapshots"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
