@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { AddTransactionDialog } from "@/components/portfolio/add-transaction-dialog";
 import { TransactionsTable } from "@/components/portfolio/transactions-table";
@@ -11,6 +11,7 @@ import { StatsCards } from "@/components/portfolio/stats-cards";
 import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 type Portfolio = {
   id: string;
@@ -43,11 +44,19 @@ type PortfolioStats = {
   costBasis: number;
   allTimeProfit: number;
   allTimeProfitPercentage: number;
+  totalInvestmentMethods: number;
+  activeTransactions: number;
 };
 
 type ChartDataPoint = {
   date: string;
   value: number;
+};
+
+type User = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
 };
 
 type PortfolioData = {
@@ -56,12 +65,23 @@ type PortfolioData = {
   transactions: Transaction[];
   chartData: ChartDataPoint[];
   methods: InvestmentMethod[];
+  isAdmin: boolean;
+  users?: User[];
+  currentUserId: string;
 };
 
 export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showCharts, setShowCharts] = useState(true);
   const [hideValues, setHideValues] = useState(false);
+
+  const handleUserChange = (userId: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("userId", userId);
+    router.push(`/portal/portfolio?${params.toString()}`);
+  };
 
   // Calculate Allocation Data
   const allocationData = useMemo(() => {
@@ -91,6 +111,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
     amount: string;
     date: Date;
     notes?: string;
+    userId?: string;
   }) => {
     try {
       const response = await fetch("/api/transactions", {
@@ -100,17 +121,29 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
       });
 
       if (response.ok) {
+        const transaction = await response.json();
+        
+        if (data.isAdmin && transaction.status === "approved") {
+          toast.success("Transaction added and approved successfully");
+        } else {
+          toast.success("Transaction added successfully");
+        }
+        
         window.location.reload();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create transaction");
       }
     } catch (error) {
       console.error("Failed to create transaction:", error);
+      toast.error("Failed to create transaction");
     }
   };
 
   if (!data.portfolio) {
     return (
       <>
-        <div className="flex min-h-screen flex-col">
+        <div className="flex flex-1 flex-col">
           <EmptyPortfolio onAddTransaction={() => setIsDialogOpen(true)} />
         </div>
         <AddTransactionDialog
@@ -118,16 +151,12 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
           onClose={() => setIsDialogOpen(false)}
           methods={data.methods}
           onSubmit={handleAddTransaction}
+          isAdmin={data.isAdmin}
+          users={data.users}
         />
       </>
     );
   }
-
-  // Calculate daily change (mocked for now as we don't have historical snapshot in stats)
-  // For now, assuming daily change is 0 or part of allTimeProfit if implied.
-  // The image shows specific 24h change. We'll pass 0 if not available.
-  const dailyChange = 0;
-  const dailyChangePercentage = 0;
 
   return (
     <>
@@ -137,13 +166,15 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
         <PortfolioHeader
           portfolioName={data.portfolio.name}
           totalValue={data.stats?.totalValue || 0}
-          dailyChange={dailyChange}
-          dailyChangePercentage={dailyChangePercentage}
           onAddTransaction={() => setIsDialogOpen(true)}
           showCharts={showCharts}
           onToggleCharts={() => setShowCharts(!showCharts)}
           hideValues={hideValues}
           onToggleHideValues={() => setHideValues(!hideValues)}
+          isAdmin={data.isAdmin}
+          users={data.users}
+          currentUserId={data.currentUserId}
+          onUserChange={handleUserChange}
         />
 
         {/* Tabs and Content */}
@@ -162,9 +193,9 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
                 allTimeProfit={data.stats.allTimeProfit}
                 allTimeProfitPercentage={data.stats.allTimeProfitPercentage}
                 costBasis={data.stats.costBasis}
+                totalInvestmentMethods={data.stats.totalInvestmentMethods}
+                activeTransactions={data.stats.activeTransactions}
                 hideValues={hideValues}
-              // Best/Worst performers could be calculated from allocationData if we tracked cost basis per asset
-              // For now passing undefined or simple placeholders if we can't derive easily
               />
             )}
 
@@ -186,9 +217,9 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
                 </div>
 
                 {/* Allocation Chart - Takes up 1 column */}
-                <div className="lg:col-span-1">
+                {/* <div className="lg:col-span-1">
                   <AllocationChart data={allocationData} />
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -211,6 +242,9 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
         onClose={() => setIsDialogOpen(false)}
         methods={data.methods}
         onSubmit={handleAddTransaction}
+        isAdmin={data.isAdmin}
+        users={data.users}
+        adminUserId={data.currentUserId}
       />
     </>
   );

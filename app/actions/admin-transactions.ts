@@ -6,7 +6,7 @@ import { transactions } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/services/auth-server";
-import { updateTodaySnapshot } from "@/lib/services/snapshot-service";
+import { createApprovalSnapshot } from "@/lib/services/snapshot-service";
 
 const transactionActionSchema = z.object({
   id: z.string().uuid(),
@@ -86,10 +86,10 @@ export async function approveTransaction(transactionId: string) {
         })
         .where(eq(transactions.id, transactionId));
     }
-
-    // Update today's snapshot for the portfolio
-    await updateTodaySnapshot(transaction.portfolioId);
   });
+
+  // Create snapshot after transaction is committed, using the transaction date
+  await createApprovalSnapshot(transaction.portfolioId, transaction.date);
 
   revalidatePath("/portal/admin/transactions");
   revalidatePath("/portal/portfolio");

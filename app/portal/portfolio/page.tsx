@@ -6,15 +6,29 @@ import {
   getPortfolioTransactions,
 } from "@/lib/services/portfolio-service";
 import { getPortfolioPerformanceData } from "@/lib/services/chart-service";
-import { requireAuth } from "@/lib/services/auth-server";
+import { requireAuth, getUserRole } from "@/lib/services/auth-server";
+import { getAllUsers } from "@/lib/services/user-service";
 import type { PortfolioTransaction } from "@/types/portfolio";
 import PortfolioClientPage from "./portfolio-client";
 
-export default async function PortfolioPage() {
-  const user = await requireAuth();
+type PageProps = {
+  searchParams: Promise<{ userId?: string }>;
+};
 
-  const portfolio = await getUserPortfolio(user.id);
+export default async function PortfolioPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const currentUser = await requireAuth();
+  const role = await getUserRole(currentUser.id);
+  const isAdmin = role === "admin";
+
+  // Determine which user's portfolio to show
+  // Admin can view any user via userId param, defaults to their own
+  // Regular users always see their own
+  const userId = isAdmin && params.userId ? params.userId : currentUser.id;
+
+  const portfolio = await getUserPortfolio(userId);
   const methods = await db.select().from(investmentMethods);
+  const users = isAdmin ? await getAllUsers() : [];
 
   let stats = null;
   let transactions: PortfolioTransaction[] = [];
@@ -55,6 +69,9 @@ export default async function PortfolioPage() {
     transactions,
     chartData,
     methods,
+    isAdmin,
+    users,
+    currentUserId: userId,
   };
 
   return <PortfolioClientPage data={data} />;

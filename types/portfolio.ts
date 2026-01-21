@@ -9,6 +9,8 @@ export interface PortfolioStats {
   costBasis: number;
   allTimeProfit: number;
   allTimeProfitPercentage: number;
+  totalInvestmentMethods: number;
+  activeTransactions: number;
 }
 
 // Transaction with joined investment method

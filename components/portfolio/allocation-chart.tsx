@@ -1,57 +1,94 @@
 "use client";
 
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig } from "@/types/chart";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Pie, PieChart, Label } from "recharts";
 
 const chartConfig = {
-  // Config is dynamic based on data names, avoiding hardcoded assets
+  value: {
+    label: "Value",
+  },
 } satisfies ChartConfig;
 
-export function AllocationChart({ data }: { data?: any[] }) {
-  const chartData = data || [];
+interface AllocationData {
+  name: string;
+  value: number;
+}
+
+export function AllocationChart({ data }: { data?: AllocationData[] }) {
+  const chartData = (data || []).map((item, index) => ({
+    ...item,
+    fill: `var(--chart-${(index % 5) + 1})`,
+  }));
+
+  // Build dynamic config from data
+  const dynamicConfig = chartData.reduce((acc, item, index) => {
+    acc[item.name] = {
+      label: item.name,
+      color: `var(--chart-${(index % 5) + 1})`,
+    };
+    return acc;
+  }, {} as Record<string, { label: string; color: string }>);
+
+  const totalValue = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.value, 0);
+  }, [chartData]);
 
   return (
-    <Card className="col-span-1 bg-card h-full">
+    <Card className="col-span-1 bg-card h-full flex flex-col">
       <CardHeader>
         <CardTitle>Allocation</CardTitle>
       </CardHeader>
-      <CardContent className="flex items-center justify-center p-0">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full mx-auto aspect-square">
-           <PieChart accessibilityLayer>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={60}
-                strokeWidth={5}
-                paddingAngle={5}
-              >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill || "var(--color-btc)"} />
-                  ))}
-              </Pie>
-              <ChartLegend
-                 content={<ChartLegendContent nameKey="name" />}
-                 className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={{ ...chartConfig, ...dynamicConfig }}
+          className="mx-auto aspect-square max-h-[350px] p-6"
+        >
+          <PieChart>
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={85}
+              strokeWidth={5}
+            >
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-3xl font-bold"
+                        >
+                          ${totalValue.toLocaleString()}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Total
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
               />
-              {/* Custom Legend to match image more closely if needed, 
-                  but ChartLegend is standard. 
-                  Image shows: Blue Dot BTC 100.00% to the right. 
-                  Recharts Legend usually is bottom. 
-                  We can implement custom legend side-by-side if we want exact match.
-              */}
-              <text
-                  x="50%"
-                  y="50%"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                >
-               {/* Center text if needed */}
-              </text>
-           </PieChart>
+            </Pie>
+          </PieChart>
         </ChartContainer>
       </CardContent>
     </Card>

@@ -1,0 +1,14 @@
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { sql } from "drizzle-orm";
+
+export async function getAllUsers() {
+  return await db
+    .select({
+      id: users.id,
+      email: users.email,
+      fullName: users.fullName,
+    })
+    .from(users)
+    .orderBy(sql`${users.fullName} NULLS LAST, ${users.email}`);
+}

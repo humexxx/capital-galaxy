@@ -49,11 +49,23 @@ export async function getPortfolioStats(portfolioId: string): Promise<PortfolioS
   const allTimeProfit = totalValue - costBasis;
   const allTimeProfitPercentage = costBasis > 0 ? (allTimeProfit / costBasis) * 100 : 0;
 
+  // Get unique investment methods count
+  const uniqueInvestmentMethods = new Set(
+    buyTransactions
+      .filter(t => t.status !== "closed")
+      .map(t => t.investmentMethodId)
+  ).size;
+
+  // Count active transactions (approved buys that are not closed)
+  const activeTransactionsCount = buyTransactions.filter(t => t.status !== "closed").length;
+
   return {
     totalValue,
     costBasis,
     allTimeProfit,
     allTimeProfitPercentage,
+    totalInvestmentMethods: uniqueInvestmentMethods,
+    activeTransactions: activeTransactionsCount,
   };
 }
 

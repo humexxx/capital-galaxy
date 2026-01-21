@@ -36,17 +36,17 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
     let startDate: Date;
 
     switch (timeRange) {
-      case "24h":
-        startDate = subDays(now, 1);
-        break;
-      case "7d":
-        startDate = subDays(now, 7);
-        break;
       case "30d":
         startDate = subDays(now, 30);
         break;
       case "90d":
         startDate = subDays(now, 90);
+        break;
+      case "120d":
+        startDate = subDays(now, 120);
+        break;
+      case "1yr":
+        startDate = subDays(now, 365);
         break;
       default:
         return data;
@@ -63,7 +63,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           <Info className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
-          {["24h", "7d", "30d", "90d", "All"].map((range) => (
+          {["30d", "90d", "120d", "1yr", "All"].map((range) => (
             <Button
               key={range}
               variant={timeRange === range ? "secondary" : "ghost"}
@@ -92,7 +92,11 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
               minTickGap={30}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                return date.toLocaleDateString("en-US", { 
+                  month: "short", 
+                  day: "numeric",
+                  year: "numeric"
+                });
               }}
             />
             <YAxis
@@ -104,11 +108,23 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
               domain={['auto', 'auto']}
             />
             <ChartTooltip
-              content={<ChartTooltipContent indicator="line" />}
+              content={
+                <ChartTooltipContent 
+                  indicator="line"
+                  labelFormatter={(value) => {
+                    const date = new Date(value);
+                    return date.toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric"
+                    });
+                  }}
+                />
+              }
             />
             <Area
               dataKey="value"
-              type="natural"
+              type="bump"
               fill="var(--color-value)"
               fillOpacity={0.4}
               stroke="var(--color-value)"

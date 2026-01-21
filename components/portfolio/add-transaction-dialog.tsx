@@ -18,6 +18,12 @@ type InvestmentMethod = {
   monthlyRoi: number;
 };
 
+type User = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+};
+
 type AddTransactionDialogProps = {
   open: boolean;
   onClose: () => void;
@@ -27,7 +33,11 @@ type AddTransactionDialogProps = {
     amount: string;
     date: Date;
     notes?: string;
+    userId?: string;
   }) => void;
+  isAdmin: boolean;
+  users?: User[];
+  adminUserId?: string;
 };
 
 export function AddTransactionDialog({
@@ -35,6 +45,9 @@ export function AddTransactionDialog({
   onClose,
   methods,
   onSubmit,
+  isAdmin,
+  users = [],
+  adminUserId,
 }: AddTransactionDialogProps) {
   const [selectedMethod, setSelectedMethod] = useState<InvestmentMethod | null>(null);
   const [showSelector, setShowSelector] = useState(true);
@@ -48,7 +61,7 @@ export function AddTransactionDialog({
     setShowSelector(true);
   };
 
-  const handleSubmit = (data: { amount: string; date: Date; notes?: string }) => {
+  const handleSubmit = (data: { amount: string; date: Date; notes?: string; userId?: string }) => {
     if (!selectedMethod) return;
     
     onSubmit({
@@ -82,10 +95,14 @@ export function AddTransactionDialog({
           </DialogHeader>
           {selectedMethod && (
             <TransactionForm
+              key={open ? 'open' : 'closed'}
               selectedMethod={selectedMethod}
               onChangeMethod={handleChangeMethod}
               onSubmit={handleSubmit}
               onCancel={handleClose}
+              isAdmin={isAdmin}
+              users={users}
+              adminUserId={adminUserId}
             />
           )}
         </DialogContent>
