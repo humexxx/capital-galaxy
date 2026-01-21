@@ -55,7 +55,7 @@ export async function getPortfolioPerformanceData(
             gte(portfolioSnapshots.date, startDate)
           )
         )
-        .orderBy(portfolioSnapshots.date)
+        .orderBy(asc(portfolioSnapshots.date))
     : db
         .select({
           date: portfolioSnapshots.date,
@@ -63,7 +63,7 @@ export async function getPortfolioPerformanceData(
         })
         .from(portfolioSnapshots)
         .where(eq(portfolioSnapshots.portfolioId, portfolioId))
-        .orderBy(portfolioSnapshots.date);
+        .orderBy(asc(portfolioSnapshots.date));
 
   const snapshots = await query;
 
@@ -73,20 +73,49 @@ export async function getPortfolioPerformanceData(
     value: parseFloat(snapshot.totalValue),
   }));
 
-  // If we have snapshots, add a dummy point at the start of current month (or previous month if today is day 1)
   if (chartData.length > 0) {
-    const now = new Date();
-    const isFirstDayOfMonth = getDate(now) === 1;
+    // If there are snapshots, add dummy point at day 1 of the first snapshot's month
+    const firstSnapshotDate = new Date(chartData[0].date);
+    const dummyStartDate = startOfMonth(firstSnapshotDate);
     
-    // If today is the first day of the month, use first day of previous month
-    // Otherwise use first day of current month
-    const dummyPointDate = isFirstDayOfMonth 
+    // Insert the dummy point at the beginning with value 0
+    chartData.unshift({
+      date: dummyStartDate.toISOString(),
+      value: 0,
+    });
+
+    // Check if the last snapshot is not from today
+    const lastSnapshot = chartData[chartData.length - 1];
+    const lastSnapshotDate = new Date(lastSnapshot.date);
+    const today = new Date(now);
+    
+    // Compare only the date part (ignore time)
+    const isSameDay = 
+      lastSnapshotDate.getFullYear() === today.getFullYear() &&
+      lastSnapshotDate.getMonth() === today.getMonth() &&
+      lastSnapshotDate.getDate() === today.getDate();
+
+    // If last snapshot is not from today, add a point with today's date and last value
+    if (!isSameDay) {
+      chartData.push({
+        date: now.toISOString(),
+        value: lastSnapshot.value,
+      });
+    }
+  } else {
+    // No snapshots, add two dummy points with value 0
+    // First day of current month (or previous month if today is day 1)
+    const isFirstDayOfMonth = getDate(now) === 1;
+    const dummyStartDate = isFirstDayOfMonth 
       ? startOfMonth(subMonths(now, 1))
       : startOfMonth(now);
-    
-    // Insert at the beginning
-    chartData.unshift({
-      date: dummyPointDate.toISOString(),
+
+    chartData.push({
+      date: dummyStartDate.toISOString(),
+      value: 0,
+    });
+    chartData.push({
+      date: now.toISOString(),
       value: 0,
     });
   }

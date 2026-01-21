@@ -42,7 +42,10 @@ interface ManualSnapshotDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialogProps) {
+export function ManualSnapshotDialog({
+  open,
+  onOpenChange,
+}: ManualSnapshotDialogProps) {
   const [date, setDate] = useState<Date>(new Date());
   const [applyInterest, setApplyInterest] = useState(false);
   const [source, setSource] = useState<SnapshotSource>("manual");
@@ -60,8 +63,13 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
       });
 
       toast.success(
-        `Snapshot created successfully. Total value: $${result.totalValue.toFixed(2)}`
+        `${result.snapshotsCreated} snapshot(s) created successfully.`
       );
+
+      // Reset form
+      setDate(new Date());
+      setApplyInterest(false);
+      setSource("manual");
 
       onOpenChange(false);
       router.refresh();
@@ -73,13 +81,24 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
     }
   };
 
+  const handleClose = (open: boolean) => {
+    if (!open && !isLoading) {
+      // Reset form when closing
+      setDate(new Date());
+      setApplyInterest(false);
+      setSource("manual");
+    }
+    onOpenChange(open);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create Manual Snapshot</DialogTitle>
           <DialogDescription>
-            Create a snapshot of your portfolio&apos;s current value with custom settings.
+            Create a snapshot of your portfolio&apos;s current value with custom
+            settings.
           </DialogDescription>
         </DialogHeader>
 
@@ -126,20 +145,25 @@ export function ManualSnapshotDialog({ open, onOpenChange }: ManualSnapshotDialo
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="manual">Manual</SelectItem>
-                <SelectItem value="admin_enforce">Admin Enforce (Protected)</SelectItem>
+                <SelectItem value="admin_enforce">
+                  Admin Enforce (Protected)
+                </SelectItem>
               </SelectContent>
             </Select>
             <FieldDescription>
-              Admin Enforce snapshots won&apos;t be deleted when clearing manual snapshots
+              Admin Enforce snapshots won&apos;t be deleted when clearing manual
+              snapshots
             </FieldDescription>
           </Field>
 
           <Field orientation="horizontal">
             <div className="space-y-1">
-              <FieldLabel htmlFor="apply-interest">Apply monthly interest</FieldLabel>
+              <FieldLabel htmlFor="apply-interest">
+                Apply monthly interest
+              </FieldLabel>
               <FieldDescription>
-                Calculate and apply compound interest to all active investments before
-                creating the snapshot
+                Calculate and apply compound interest to all active investments
+                before creating the snapshot
               </FieldDescription>
             </div>
             <Switch

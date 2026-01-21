@@ -11,6 +11,7 @@ import { StatsCards } from "@/components/portfolio/stats-cards";
 import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
 type Portfolio = {
   id: string;
@@ -120,10 +121,22 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
       });
 
       if (response.ok) {
+        const transaction = await response.json();
+        
+        if (data.isAdmin && transaction.status === "approved") {
+          toast.success("Transaction added and approved successfully");
+        } else {
+          toast.success("Transaction added successfully");
+        }
+        
         window.location.reload();
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create transaction");
       }
     } catch (error) {
       console.error("Failed to create transaction:", error);
+      toast.error("Failed to create transaction");
     }
   };
 

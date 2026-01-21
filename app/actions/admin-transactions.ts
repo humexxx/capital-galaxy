@@ -88,8 +88,8 @@ export async function approveTransaction(transactionId: string) {
     }
   });
 
-  // Create snapshot after transaction is committed
-  await createApprovalSnapshot(transaction.portfolioId);
+  // Create snapshot after transaction is committed, using the transaction date
+  await createApprovalSnapshot(transaction.portfolioId, transaction.date);
 
   revalidatePath("/portal/admin/transactions");
   revalidatePath("/portal/portfolio");

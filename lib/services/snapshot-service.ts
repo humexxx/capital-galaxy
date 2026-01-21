@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { portfolioSnapshots, transactions } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, lte } from "drizzle-orm";
 import type { SnapshotSource } from "@/schemas/snapshot";
 
 /**
@@ -43,9 +43,10 @@ export async function createDailySnapshots() {
 /**
  * Create snapshot when approving a transaction
  * Does NOT delete existing snapshots - allows multiple snapshots per day
+ * Uses the transaction date for the snapshot
  */
-export async function createApprovalSnapshot(portfolioId: string) {
-  await createSnapshotForPortfolio(portfolioId, "admin_approval");
+export async function createApprovalSnapshot(portfolioId: string, transactionDate: Date) {
+  await createSnapshotForPortfolio(portfolioId, "admin_approval", transactionDate);
 }
 
 /**
@@ -84,7 +85,7 @@ async function createSnapshotForPortfolio(
   source: SnapshotSource,
   date: Date = new Date()
 ): Promise<{ created: boolean; totalValue: number }> {
-  // Sum currentValue of all approved buy transactions
+  // Sum currentValue of all approved buy transactions with date <= snapshot date
   const result = await db
     .select({
       totalValue: sql<string>`COALESCE(SUM(${transactions.currentValue}), 0)`,
@@ -94,7 +95,8 @@ async function createSnapshotForPortfolio(
       and(
         eq(transactions.portfolioId, portfolioId),
         eq(transactions.status, "approved"),
-        eq(transactions.type, "buy")
+        eq(transactions.type, "buy"),
+        lte(transactions.date, date)
       )
     );
 
@@ -125,16 +127,8 @@ async function createSnapshotForPortfolio(
       source,
     });
 
-    console.log(
-      `Created snapshot for portfolio ${portfolioId} with value ${totalValue} from source ${source}`
-    );
-
     return { created: true, totalValue };
   }
-
-  console.log(
-    `Skipped snapshot for portfolio ${portfolioId} - totalValue is 0 and no previous value`
-  );
 
   return { created: false, totalValue };
 }

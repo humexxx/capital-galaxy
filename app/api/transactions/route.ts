@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     }, isAdmin);
 
     if (isAdmin && transaction.status === "approved") {
-      await createApprovalSnapshot(portfolio.id);
+      await createApprovalSnapshot(portfolio.id, transactionDate);
     }
 
     return NextResponse.json(transaction);
