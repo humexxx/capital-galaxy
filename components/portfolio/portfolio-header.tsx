@@ -12,6 +12,7 @@ import {
   Camera,
   Trash2,
 } from "lucide-react";
+import { UserSelector } from "@/components/user-selector";
 import { Switch } from "@/components/ui/switch";
 import { ManualSnapshotDialog } from "./manual-snapshot-dialog";
 import { deleteManualSnapshotsAction } from "@/app/actions/portfolio-snapshots";
@@ -29,6 +30,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+type User = {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+};
+
 type PortfolioHeaderProps = {
   portfolioName: string;
   totalValue: number;
@@ -38,6 +45,9 @@ type PortfolioHeaderProps = {
   hideValues: boolean;
   onToggleHideValues: () => void;
   isAdmin: boolean;
+  users?: User[];
+  currentUserId?: string;
+  onUserChange?: (userId: string) => void;
 };
 
 export function PortfolioHeader({
@@ -49,6 +59,9 @@ export function PortfolioHeader({
   hideValues,
   onToggleHideValues,
   isAdmin,
+  users = [],
+  currentUserId,
+  onUserChange,
 }: PortfolioHeaderProps) {
   const [isSnapshotDialogOpen, setIsSnapshotDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -135,6 +148,19 @@ export function PortfolioHeader({
           </div>
           <AdminOnly isAdmin={isAdmin}>
             <div className="flex items-center gap-3 bg-accent w-full p-2 rounded-md justify-end">
+              {users.length > 0 && currentUserId && onUserChange && (
+                <>
+                  <div className="flex-1 max-w-xs">
+                    <UserSelector
+                      users={users}
+                      value={currentUserId}
+                      onValueChange={onUserChange}
+                      placeholder="Select user"
+                    />
+                  </div>
+                  <div className="h-6 w-px bg-border" />
+                </>
+              )}
               <Button
                 variant="outline"
                 className="gap-2 bg-background"

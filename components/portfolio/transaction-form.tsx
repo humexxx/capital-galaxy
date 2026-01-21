@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar as CalendarIcon, DollarSign, User as UserIcon } from "lucide-react";
+import { Calendar as CalendarIcon, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,17 +12,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Field,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { UserSelector } from "@/components/user-selector";
 import { format } from "date-fns";
 
 type InvestmentMethod = {
@@ -51,6 +45,7 @@ type TransactionFormProps = {
   onCancel: () => void;
   isAdmin: boolean;
   users?: User[];
+  adminUserId?: string;
 };
 
 export function TransactionForm({
@@ -60,12 +55,13 @@ export function TransactionForm({
   onCancel,
   isAdmin,
   users = [],
+  adminUserId,
 }: TransactionFormProps) {
   const [activeTab, setActiveTab] = useState<"buy" | "withdrawal">("buy");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState<Date>(new Date());
   const [notes, setNotes] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedUserId, setSelectedUserId] = useState<string>(adminUserId || "");
 
   const fee = "0";
   const total = amount ? (parseFloat(amount) + parseFloat(fee)).toFixed(2) : "0";
@@ -132,21 +128,12 @@ export function TransactionForm({
         {isAdmin && (
           <Field>
             <FieldLabel htmlFor="user">User</FieldLabel>
-            <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger className="w-full">
-                <div className="flex items-center gap-2">
-                  <UserIcon className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Select a user" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.fullName || user.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <UserSelector
+              users={users}
+              value={selectedUserId}
+              onValueChange={setSelectedUserId}
+              placeholder="Select a user"
+            />
           </Field>
         )}
 
