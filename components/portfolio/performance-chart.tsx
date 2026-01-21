@@ -92,7 +92,11 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
               minTickGap={30}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                return date.toLocaleDateString("en-US", { 
+                  month: "short", 
+                  day: "numeric",
+                  year: "numeric"
+                });
               }}
             />
             <YAxis
@@ -104,7 +108,19 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
               domain={['auto', 'auto']}
             />
             <ChartTooltip
-              content={<ChartTooltipContent indicator="line" />}
+              content={
+                <ChartTooltipContent 
+                  indicator="line"
+                  labelFormatter={(value) => {
+                    const date = new Date(value);
+                    return date.toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric"
+                    });
+                  }}
+                />
+              }
             />
             <Area
               dataKey="value"
