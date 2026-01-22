@@ -1,90 +1,184 @@
 "use client"
 
 import * as React from "react"
-import {
-    PieChart,
-    Home,
-    TrendingUp,
-    ShieldCheck,
-} from "lucide-react"
-
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarRail,
-} from "@/components/ui/sidebar"
+import { GalleryVerticalEnd } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-export function AppSidebar({ role, ...props }: React.ComponentProps<typeof Sidebar> & { role?: "admin" | "user" }) {
-    const pathname = usePathname()
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarRail,
+  useSidebar,
+} from "@/components/ui/sidebar"
 
-    const items = [
-        {
-            title: "Dashboard",
-            url: "/portal",
-            icon: Home,
-        },
-        {
-            title: "Portfolio",
-            url: "/portal/portfolio",
-            icon: PieChart,
-        },
-        {
-            title: "Investment Methods",
-            url: "/portal/investment-methods",
-            icon: TrendingUp,
-        },
+type NavItem = {
+  title: string
+  url: string
+  disabled?: boolean
+}
+
+type NavSection = {
+  title: string
+  url: string
+  items: NavItem[]
+  disabled?: boolean
+}
+
+export function AppSidebar({ role, ...props }: React.ComponentProps<typeof Sidebar> & { role?: "admin" | "user" }) {
+  const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
+
+  // General categories; sections not yet available surface a single non-clickable placeholder.
+  const navSections: NavSection[] = React.useMemo(() => {
+    const financeItems: NavItem[] = [
+      {
+        title: "Portfolio",
+        url: "/portal/portfolio",
+      },
+      {
+        title: "Investment Methods",
+        url: "/portal/investment-methods",
+      },
     ]
 
-    // Add admin items if role is admin
     if (role === "admin") {
-        items.push({
-            title: "Transactions",
-            url: "/portal/admin/transactions",
-            icon: ShieldCheck,
-        })
+      financeItems.push({
+        title: "Transactions",
+        url: "/portal/admin/transactions",
+      })
     }
 
-    return (
-        <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader>
-                <div className="flex items-center gap-2 px-2 py-1">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground font-bold">
-                        C
-                    </div>
-                    <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
-                        Capital Galaxy
-                    </span>
+    return [
+      {
+        title: "Dashboard",
+        url: "/portal",
+        items: [],
+      },
+      {
+        title: "Finance",
+        url: "/portal/portfolio",
+        items: financeItems,
+      },
+      {
+        title: "Productivity",
+        url: "#",
+        disabled: true,
+        items: [
+          {
+            title: "Coming soon",
+            url: "#",
+            disabled: true,
+          },
+        ],
+      },
+      {
+        title: "Wellness",
+        url: "#",
+        disabled: true,
+        items: [
+          {
+            title: "Coming soon",
+            url: "#",
+            disabled: true,
+          },
+        ],
+      },
+      {
+        title: "Healthy Entertainment",
+        url: "#",
+        disabled: true,
+        items: [
+          {
+            title: "Coming soon",
+            url: "#",
+            disabled: true,
+          },
+        ],
+      },
+    ]
+  }, [role])
+
+  const isActive = (href: string) => pathname === href
+
+  return (
+    <Sidebar collapsible="offExamples" {...props}>
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/portal" onClick={handleNavClick}>
+                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <GalleryVerticalEnd className="size-4" />
                 </div>
-            </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Menu</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                                        <Link href={item.url}>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-            </SidebarContent>
-            <SidebarRail />
-        </Sidebar>
-    )
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-medium">Capital Galaxy</span>
+                  <span className="text-xs text-sidebar-foreground/70">v0.1.0</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            {navSections.map((section) => {
+              const sectionActive = section.title === "Dashboard" && isActive(section.url)
+
+              return (
+                <SidebarMenuItem key={section.title}>
+                  {section.disabled ? (
+                    <SidebarMenuButton isActive={sectionActive} disabled>
+                      <span className="opacity-60">{section.title}</span>
+                    </SidebarMenuButton>
+                  ) : (
+                    <SidebarMenuButton asChild isActive={sectionActive}>
+                      <Link href={section.url} className="font-medium" onClick={handleNavClick}>
+                        {section.title}
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
+                  {section.items.length ? (
+                    <SidebarMenuSub>
+                      {section.items.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          {item.disabled ? (
+                            <SidebarMenuSubButton asChild>
+                              <span className="cursor-not-allowed opacity-60" aria-disabled="true">
+                                {item.title}
+                              </span>
+                            </SidebarMenuSubButton>
+                          ) : (
+                            <SidebarMenuSubButton asChild isActive={isActive(item.url)}>
+                              <Link href={item.url} onClick={handleNavClick}>{item.title}</Link>
+                            </SidebarMenuSubButton>
+                          )}
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  ) : null}
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
+  )
 }

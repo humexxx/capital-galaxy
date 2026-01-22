@@ -18,7 +18,7 @@ export default async function PortalLayout({
   const role = await getUserRole(user.id) || "user";
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false} className="[--sidebar-width-icon:3rem] transition-all duration-200">
       <AppSidebar role={role} />
       <SidebarInset>
         <AppHeader user={user} />
