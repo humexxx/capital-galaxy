@@ -1,6 +1,7 @@
 
 "use client";
 
+import * as React from "react";
 import {
   ChevronsUpDown,
   LogOut,
@@ -31,10 +32,32 @@ export function NavUser({
     avatar: string;
   };
 }) {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const handleSignOut = async () => {
     await signOut();
     window.location.href = "/login";
   };
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" className="flex items-center gap-2 px-2" disabled>
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={user.avatar} alt={user.name} />
+          <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <div className="hidden md:grid flex-1 text-left text-sm leading-tight">
+          <span className="truncate font-semibold">{user.name}</span>
+          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+        </div>
+        <ChevronsUpDown className="hidden md:block ml-auto h-4 w-4" />
+      </Button>
+    )
+  }
 
   return (
     <DropdownMenu>
