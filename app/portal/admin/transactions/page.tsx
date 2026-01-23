@@ -1,5 +1,11 @@
 import { getAdminTransactions } from "@/lib/services/admin-service";
 import { DataTable } from "@/components/admin/transactions/data-table";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Transaction Management | Capital Galaxy",
+  description: "Approve or reject user transactions and manage investment requests",
+};
 import { TransactionFilters } from "@/components/admin/transactions/filters";
 import { requireAdmin } from "@/lib/services/auth-server";
 import { redirect } from "next/navigation";
@@ -43,14 +49,16 @@ export default async function AdminTransactionsPage({
     });
 
     return (
-        <div className="container mx-auto py-10">
-            <h1 className="text-3xl font-bold mb-6">Transaction Management</h1>
-            <p className="text-muted-foreground mb-8">
-                Approve or reject transactions. Filter by user, status, or type.
-            </p>
+        <>
+            <div className="space-y-2">
+                <h1 className="text-2xl font-bold">Transaction Management</h1>
+                <p className="text-muted-foreground">
+                    Approve or reject transactions. Filter by user, status, or type.
+                </p>
+            </div>
 
             <TransactionFilters />
             <DataTable data={data} />
-        </div>
+        </>
     );
 }

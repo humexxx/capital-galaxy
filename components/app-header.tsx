@@ -14,14 +14,18 @@ export function AppHeader({ user }: { user: User }) {
   };
 
   return (
-    <header className="sticky top-0 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-6 justify-between">
-      <div className="flex items-center gap-4">
-        <SidebarTrigger />
-        <h1 className="text-xl font-bold">Capital Galaxy</h1>
-      </div>
-      <div className="flex items-center gap-4">
-        <ModeToggle />
-        <NavUser user={userData} />
+    <header className="sticky top-0 flex h-16 shrink-0 items-center border-b bg-background">
+      <div className="flex items-center justify-between w-full max-w-screen-2xl mx-auto px-8">
+        <div className="flex items-center gap-4">
+          <div className="-ml-2">
+            <SidebarTrigger />
+          </div>
+          <h1 className="text-xl font-bold">Capital Galaxy</h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <ModeToggle />
+          <NavUser user={userData} />
+        </div>
       </div>
     </header>
   );

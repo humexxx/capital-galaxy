@@ -1,5 +1,11 @@
 import { db } from "@/db";
 import { investmentMethods } from "@/db/schema";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Portfolio | Capital Galaxy",
+  description: "View and manage your investment portfolio",
+};
 import {
   getUserPortfolio,
   getPortfolioStats,
@@ -9,7 +15,7 @@ import { getPortfolioPerformanceData } from "@/lib/services/chart-service";
 import { requireAuth, getUserRole } from "@/lib/services/auth-server";
 import { getAllUsers } from "@/lib/services/user-service";
 import type { PortfolioTransaction } from "@/types/portfolio";
-import PortfolioClientPage from "./portfolio-client";
+import PortfolioClientPage from "@/components/portal/portfolio-client";
 
 type PageProps = {
   searchParams: Promise<{ userId?: string }>;

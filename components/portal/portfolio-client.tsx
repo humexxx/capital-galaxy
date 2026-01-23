@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EmptyPortfolio } from "@/components/portfolio/empty-portfolio";
 import { AddTransactionDialog } from "@/components/portfolio/add-transaction-dialog";
@@ -8,7 +8,6 @@ import { TransactionsTable } from "@/components/portfolio/transactions-table";
 import { PerformanceChart } from "@/components/portfolio/performance-chart";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { StatsCards } from "@/components/portfolio/stats-cards";
-import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -83,29 +82,6 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
     router.push(`/portal/portfolio?${params.toString()}`);
   };
 
-  // Calculate Allocation Data
-  const allocationData = useMemo(() => {
-    const map = new Map<string, number>();
-    const approved = data.transactions.filter(t => t.status === "approved");
-
-    approved.forEach(t => {
-      const value = parseFloat(t.total);
-      // Use investment method name as asset identifier for now
-      const key = t.investmentMethod?.name || "Unknown";
-      if (t.type === "buy") {
-        map.set(key, (map.get(key) || 0) + value);
-      } else {
-        map.set(key, (map.get(key) || 0) - value);
-      }
-    });
-
-    return Array.from(map.entries()).map(([name, value], index) => ({
-      name,
-      value: Math.max(0, value), // No negative allocation visualization
-      fill: `var(--chart-${(index % 5) + 1})`,
-    })).filter(item => item.value > 0);
-  }, [data.transactions]);
-
   const handleAddTransaction = async (transactionData: {
     investmentMethodId: string;
     amount: string;
@@ -143,9 +119,7 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
   if (!data.portfolio) {
     return (
       <>
-        <div className="flex flex-1 flex-col">
-          <EmptyPortfolio onAddTransaction={() => setIsDialogOpen(true)} />
-        </div>
+        <EmptyPortfolio onAddTransaction={() => setIsDialogOpen(true)} />
         <AddTransactionDialog
           open={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
@@ -160,10 +134,8 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-8 p-8 max-w-400 mx-auto">
-
-        {/* Top Header Section */}
-        <PortfolioHeader
+      {/* Top Header Section */}
+      <PortfolioHeader
           portfolioName={data.portfolio.name}
           totalValue={data.stats?.totalValue || 0}
           onAddTransaction={() => setIsDialogOpen(true)}
@@ -235,7 +207,6 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
 
       <AddTransactionDialog
         open={isDialogOpen}
