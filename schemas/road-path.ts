@@ -9,7 +9,7 @@ export const createRoadPathSchema = z.object({
   unit: z.string().max(50, "Unit too long").nullable().optional(),
   startDate: z.date(),
   targetDate: z.date().nullable().optional(),
-  autoCreateTasks: z.boolean().default(false),
+  autoCreateTasks: z.boolean().optional(),
   taskFrequency: roadPathFrequencyEnum.nullable().optional(),
 }).refine(
   (data) => {
@@ -57,6 +57,7 @@ export const updateRoadPathMilestoneSchema = z.object({
   description: z.string().max(2000, "Description too long").nullable().optional(),
   targetValue: z.number().positive().nullable().optional(),
   order: z.number().min(0).optional(),
+  completed: z.boolean().optional(),
   completedAt: z.date().nullable().optional(),
 });
 
@@ -66,7 +67,7 @@ export const createRoadPathProgressSchema = z.object({
   roadPathId: z.string().uuid(),
   value: z.number().min(0),
   notes: z.string().max(500, "Notes too long").nullable().optional(),
-  date: z.date().default(() => new Date()),
+  date: z.date().optional(),
 });
 
 export type CreateRoadPathProgressData = z.infer<typeof createRoadPathProgressSchema>;

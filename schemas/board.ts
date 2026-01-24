@@ -20,6 +20,7 @@ export const createBoardTaskSchema = z.object({
   roadPathId: z.uuid().nullable().optional(),
   title: z.string().min(1, "Task title is required").max(200, "Task title too long"),
   description: z.string().max(2000, "Description too long").nullable().optional(),
+  priority: z.string().nullable().optional(),
   order: z.number().min(0),
   dueDate: z.date().nullable().optional(),
 });
@@ -31,6 +32,7 @@ export const updateBoardTaskSchema = z.object({
   columnId: z.uuid().optional(),
   title: z.string().min(1, "Task title is required").max(200, "Task title too long").optional(),
   description: z.string().max(2000, "Description too long").nullable().optional(),
+  priority: z.string().nullable().optional(),
   order: z.number().min(0).optional(),
   dueDate: z.date().nullable().optional(),
   completedAt: z.date().nullable().optional(),
