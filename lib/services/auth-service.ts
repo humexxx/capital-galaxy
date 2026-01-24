@@ -1,8 +1,9 @@
 
 import { createClient } from "@/lib/supabase"
+import type { AuthResponse } from "@supabase/supabase-js";
 
 export class AuthService {
-  static async signInWithEmail(email: string) {
+  static async signInWithEmail(email: string): Promise<void> {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -16,7 +17,7 @@ export class AuthService {
     }
   }
 
-  static async signInWithGoogle() {
+  static async signInWithGoogle(): Promise<void> {
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -33,7 +34,7 @@ export class AuthService {
   // Note: The user requested "login with email", usually implies magic link or password.
   // The provided login form has a password field, so I should use signInWithPassword.
   
-  static async loginWithPassword(email: string, password: string) {
+  static async loginWithPassword(email: string, password: string): Promise<AuthResponse['data']> {
     const supabase = createClient()
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -47,7 +48,7 @@ export class AuthService {
     return data
   }
 
-  static async signUpWithEmail(email: string, password: string, name: string) {
+  static async signUpWithEmail(email: string, password: string, name: string): Promise<AuthResponse['data']> {
     const supabase = createClient()
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -66,7 +67,7 @@ export class AuthService {
     return data
   }
   
-  static async signOut() {
+  static async signOut(): Promise<void> {
     const supabase = createClient()
     const { error } = await supabase.auth.signOut()
     if (error) {
@@ -74,7 +75,7 @@ export class AuthService {
     }
   }
 
-  static async resetPasswordForEmail(email: string) {
+  static async resetPasswordForEmail(email: string): Promise<void> {
     const supabase = createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${location.origin}/auth/callback?next=/portal/profile/update-password`,
@@ -86,7 +87,7 @@ export class AuthService {
   }
 }
 
-export async function signOut() {
+export async function signOut(): Promise<void> {
   const supabase = createClient();
   await supabase.auth.signOut();
 }

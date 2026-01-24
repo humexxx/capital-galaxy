@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { transactions, users, investmentMethods, portfolios } from "@/db/schema";
 import { desc, eq, and, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
+import type { AdminTransactionRow } from "@/types";
 
 export type TransactionFilter = {
   userId?: string;
@@ -9,7 +10,7 @@ export type TransactionFilter = {
   type?: "buy" | "withdrawal";
 };
 
-export async function getAdminTransactions(filters?: TransactionFilter) {
+export async function getAdminTransactions(filters?: TransactionFilter): Promise<AdminTransactionRow[]> {
   const conditions: SQL[] = [];
 
   // Create aliases for approved/rejected by users

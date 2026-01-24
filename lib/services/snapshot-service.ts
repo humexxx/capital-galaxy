@@ -7,7 +7,12 @@ import type { SnapshotSource } from "@/schemas/snapshot";
  * Create daily snapshots for all portfolios with approved transactions
  * Sums currentValue of all active buy transactions per portfolio
  */
-export async function createDailySnapshots() {
+export async function createDailySnapshots(): Promise<{
+  date: Date;
+  snapshotsCreated: number;
+  totalPortfolios: number;
+  errors: string[];
+}> {
   // Get all portfolios
   const allPortfolios = await db.query.portfolios.findMany();
 
@@ -45,7 +50,7 @@ export async function createDailySnapshots() {
  * Does NOT delete existing snapshots - allows multiple snapshots per day
  * Uses the transaction date for the snapshot
  */
-export async function createApprovalSnapshot(portfolioId: string, transactionDate: Date) {
+export async function createApprovalSnapshot(portfolioId: string, transactionDate: Date): Promise<void> {
   await createSnapshotForPortfolio(portfolioId, "admin_approval", transactionDate);
 }
 
@@ -57,15 +62,15 @@ export async function createManualSnapshot(
   portfolioId: string,
   date: Date = new Date(),
   source: SnapshotSource = "manual"
-) {
+): Promise<{ created: boolean; totalValue: number }> {
   return await createSnapshotForPortfolio(portfolioId, source, date);
 }
 
 /**
  * Delete all manual snapshots for a portfolio
  */
-export async function deleteManualSnapshots(portfolioId: string) {
-  const result = await db
+export async function deleteManualSnapshots(portfolioId: string): Promise<void> {
+  await db
     .delete(portfolioSnapshots)
     .where(
       and(
@@ -73,8 +78,6 @@ export async function deleteManualSnapshots(portfolioId: string) {
         eq(portfolioSnapshots.source, "manual")
       )
     );
-
-  return result;
 }
 
 /**

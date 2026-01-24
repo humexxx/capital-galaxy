@@ -8,7 +8,10 @@ import { eq, and, gt, lte } from "drizzle-orm";
  * Marks transactions with currentValue <= 0 as 'closed'
  * @param beforeDate - Optional date to only apply interest to transactions created before this date
  */
-export async function applyMonthlyInterest(beforeDate?: Date) {
+export async function applyMonthlyInterest(beforeDate?: Date): Promise<{
+  processed: number;
+  closed: number;
+}> {
   // Build where conditions
   const conditions = [
     eq(transactions.status, "approved"),

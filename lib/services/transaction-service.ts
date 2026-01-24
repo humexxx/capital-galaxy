@@ -1,7 +1,9 @@
 import { db } from "@/db";
-import { transactions, portfolios } from "@/db/schema";
+import { transactions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getUserPortfolio, createPortfolio } from "./portfolio-service";
+import type { Portfolio } from "@/types/portfolio";
+import type { Transaction } from "@/types";
 
 import { TransactionInput } from "@/types/transaction"
 
@@ -9,7 +11,7 @@ export async function createTransaction(
   userId: string,
   data: TransactionInput,
   isAdmin: boolean = false
-) {
+): Promise<{ transaction: Transaction; portfolio: Portfolio }> {
   let portfolio = await getUserPortfolio(userId);
 
   if (!portfolio) {
@@ -45,7 +47,7 @@ export async function createTransaction(
   return { transaction, portfolio };
 }
 
-export async function getPortfolioTransactions(portfolioId: string) {
+export async function getPortfolioTransactions(portfolioId: string): Promise<Transaction[]> {
   return await db
     .select()
     .from(transactions)

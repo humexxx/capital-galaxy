@@ -24,18 +24,20 @@ export interface Transaction {
 export type AdminTransactionRow = {
   id: string;
   amount: string;
+  fee: string;
   total: string;
   date: Date;
   status: "pending" | "approved" | "rejected" | "closed";
   type: "buy" | "withdrawal";
   notes: string | null;
   user: {
-    id?: string;
+    id: string;
     email: string | null;
     fullName: string | null;
     avatarUrl: string | null;
   } | null;
   method: {
+    id: string;
     name: string;
   } | null;
   portfolioName: string | null;

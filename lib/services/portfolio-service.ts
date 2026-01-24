@@ -1,16 +1,16 @@
 import { db } from "@/db";
 import { portfolios, transactions, investmentMethods } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
-import type { PortfolioTransaction, PortfolioStats, PortfolioAsset } from "@/types/portfolio";
+import { eq, and } from "drizzle-orm";
+import type { Portfolio, PortfolioTransaction, PortfolioStats, PortfolioAsset } from "@/types/portfolio";
 
-export async function getUserPortfolio(userId: string) {
+export async function getUserPortfolio(userId: string): Promise<Portfolio | null> {
   const portfolio = await db.query.portfolios.findFirst({
     where: eq(portfolios.userId, userId),
   });
   return portfolio || null;
 }
 
-export async function createPortfolio(userId: string, name?: string) {
+export async function createPortfolio(userId: string, name?: string): Promise<Portfolio> {
   const [portfolio] = await db
     .insert(portfolios)
     .values({

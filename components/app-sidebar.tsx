@@ -76,13 +76,15 @@ export function AppSidebar({ role, ...props }: React.ComponentProps<typeof Sideb
       },
       {
         title: "Productivity",
-        url: "#",
-        disabled: true,
+        url: "/portal/productivity/board",
         items: [
           {
-            title: "Coming soon",
-            url: "#",
-            disabled: true,
+            title: "Board",
+            url: "/portal/productivity/board",
+          },
+          {
+            title: "Road Paths",
+            url: "/portal/productivity/road-paths",
           },
         ],
       },

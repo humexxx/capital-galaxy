@@ -6,6 +6,7 @@ export const riskLevelEnum = pgEnum("risk_level", ["Low", "Medium", "High"]);
 export const transactionStatusEnum = pgEnum("transaction_status", ["pending", "approved", "rejected", "closed"]);
 export const transactionTypeEnum = pgEnum("transaction_type", ["buy", "withdrawal"]);
 export const snapshotSourceEnum = pgEnum("snapshot_source", ["system_cron", "admin_approval", "manual", "admin_enforce"]);
+export const roadPathFrequencyEnum = pgEnum("road_path_frequency", ["daily", "every_other_day", "weekly", "biweekly", "monthly"]);
 
 // Define auth schema to reference auth.users
 const authSchema = pgSchema("auth");
@@ -90,6 +91,81 @@ export const appState = pgTable("app_state", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+// Productivity Feature Tables
+export const boardColumns = pgTable("board_columns", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  order: real("order").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const boardTasks = pgTable("board_tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  columnId: uuid("column_id")
+    .notNull()
+    .references(() => boardColumns.id, { onDelete: "cascade" }),
+  roadPathId: uuid("road_path_id").references(() => roadPaths.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  order: real("order").notNull(),
+  dueDate: timestamp("due_date", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const roadPaths = pgTable("road_paths", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  targetValue: numeric("target_value", { precision: 20, scale: 2 }),
+  currentValue: numeric("current_value", { precision: 20, scale: 2 }).default("0"),
+  unit: text("unit"),
+  startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+  targetDate: timestamp("target_date", { withTimezone: true }),
+  autoCreateTasks: real("auto_create_tasks").notNull().default(0),
+  taskFrequency: roadPathFrequencyEnum("task_frequency"),
+  lastTaskCreatedAt: timestamp("last_task_created_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const roadPathMilestones = pgTable("road_path_milestones", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roadPathId: uuid("road_path_id")
+    .notNull()
+    .references(() => roadPaths.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  targetValue: numeric("target_value", { precision: 20, scale: 2 }),
+  order: real("order").notNull(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+export const roadPathProgress = pgTable("road_path_progress", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roadPathId: uuid("road_path_id")
+    .notNull()
+    .references(() => roadPaths.id, { onDelete: "cascade" }),
+  value: numeric("value", { precision: 20, scale: 2 }).notNull(),
+  notes: text("notes"),
+  date: timestamp("date", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 // Relations
 export const transactionsRelations = relations(transactions, ({ one }) => ({
   investmentMethod: one(investmentMethods, {
@@ -99,5 +175,52 @@ export const transactionsRelations = relations(transactions, ({ one }) => ({
   portfolio: one(portfolios, {
     fields: [transactions.portfolioId],
     references: [portfolios.id],
+  }),
+}));
+
+export const boardColumnsRelations = relations(boardColumns, ({ one, many }) => ({
+  user: one(users, {
+    fields: [boardColumns.userId],
+    references: [users.id],
+  }),
+  tasks: many(boardTasks),
+}));
+
+export const boardTasksRelations = relations(boardTasks, ({ one }) => ({
+  user: one(users, {
+    fields: [boardTasks.userId],
+    references: [users.id],
+  }),
+  column: one(boardColumns, {
+    fields: [boardTasks.columnId],
+    references: [boardColumns.id],
+  }),
+  roadPath: one(roadPaths, {
+    fields: [boardTasks.roadPathId],
+    references: [roadPaths.id],
+  }),
+}));
+
+export const roadPathsRelations = relations(roadPaths, ({ one, many }) => ({
+  user: one(users, {
+    fields: [roadPaths.userId],
+    references: [users.id],
+  }),
+  milestones: many(roadPathMilestones),
+  progress: many(roadPathProgress),
+  tasks: many(boardTasks),
+}));
+
+export const roadPathMilestonesRelations = relations(roadPathMilestones, ({ one }) => ({
+  roadPath: one(roadPaths, {
+    fields: [roadPathMilestones.roadPathId],
+    references: [roadPaths.id],
+  }),
+}));
+
+export const roadPathProgressRelations = relations(roadPathProgress, ({ one }) => ({
+  roadPath: one(roadPaths, {
+    fields: [roadPathProgress.roadPathId],
+    references: [roadPaths.id],
   }),
 }));
