@@ -7,10 +7,11 @@ export const createRoadPathSchema = z.object({
   description: z.string().max(2000, "Description too long").nullable().optional(),
   targetValue: z.number().positive().nullable().optional(),
   unit: z.string().max(50, "Unit too long").nullable().optional(),
-  startDate: z.date(),
-  targetDate: z.date().nullable().optional(),
+  startDate: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)),
+  targetDate: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)).nullable().optional(),
   autoCreateTasks: z.boolean().optional(),
   taskFrequency: roadPathFrequencyEnum.nullable().optional(),
+  createFirstTask: z.boolean().optional(),
 }).refine(
   (data) => {
     if (data.autoCreateTasks && !data.taskFrequency) {
@@ -24,7 +25,8 @@ export const createRoadPathSchema = z.object({
   }
 );
 
-export type CreateRoadPathData = z.infer<typeof createRoadPathSchema>;
+export type CreateRoadPathInput = z.input<typeof createRoadPathSchema>;
+export type CreateRoadPathData = z.output<typeof createRoadPathSchema>;
 
 export const updateRoadPathSchema = z.object({
   id: z.uuid(),
@@ -33,13 +35,13 @@ export const updateRoadPathSchema = z.object({
   targetValue: z.number().positive().nullable().optional(),
   currentValue: z.number().min(0).optional(),
   unit: z.string().max(50, "Unit too long").nullable().optional(),
-  targetDate: z.date().nullable().optional(),
+  targetDate: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)).nullable().optional(),
   autoCreateTasks: z.boolean().optional(),
   taskFrequency: roadPathFrequencyEnum.nullable().optional(),
-  completedAt: z.date().nullable().optional(),
+  completedAt: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)).nullable().optional(),
 });
 
-export type UpdateRoadPathData = z.infer<typeof updateRoadPathSchema>;
+export type UpdateRoadPathData = z.output<typeof updateRoadPathSchema>;
 
 export const createRoadPathMilestoneSchema = z.object({
   roadPathId: z.string().uuid(),
@@ -58,7 +60,7 @@ export const updateRoadPathMilestoneSchema = z.object({
   targetValue: z.number().positive().nullable().optional(),
   order: z.number().min(0).optional(),
   completed: z.boolean().optional(),
-  completedAt: z.date().nullable().optional(),
+  completedAt: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)).nullable().optional(),
 });
 
 export type UpdateRoadPathMilestoneData = z.infer<typeof updateRoadPathMilestoneSchema>;
@@ -67,7 +69,8 @@ export const createRoadPathProgressSchema = z.object({
   roadPathId: z.string().uuid(),
   value: z.number().min(0),
   notes: z.string().max(500, "Notes too long").nullable().optional(),
-  date: z.date().optional(),
+  date: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)).optional(),
 });
 
-export type CreateRoadPathProgressData = z.infer<typeof createRoadPathProgressSchema>;
+export type CreateRoadPathProgressInput = z.input<typeof createRoadPathProgressSchema>;
+export type CreateRoadPathProgressData = z.output<typeof createRoadPathProgressSchema>;

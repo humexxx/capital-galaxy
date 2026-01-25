@@ -21,7 +21,7 @@ export const createBoardTaskSchema = z.object({
   title: z.string().min(1, "Task title is required").max(200, "Task title too long"),
   description: z.string().max(2000, "Description too long").nullable().optional(),
   priority: z.string().nullable().optional(),
-  order: z.number().min(0),
+  order: z.number().min(0).optional(),
   dueDate: z.date().nullable().optional(),
 });
 

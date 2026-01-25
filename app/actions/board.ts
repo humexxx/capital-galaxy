@@ -118,7 +118,14 @@ export async function createBoardTaskAction(data: CreateBoardTaskData) {
   const user = await requireAuth();
 
   const validated = createBoardTaskSchema.parse(data);
-  const task = await createBoardTask(user.id, validated);
+  
+  // Calculate order if not provided
+  const order = validated.order ?? await getNextTaskOrder(validated.columnId, user.id);
+  
+  const task = await createBoardTask(user.id, {
+    ...validated,
+    order,
+  });
 
   revalidatePath("/portal/productivity");
 

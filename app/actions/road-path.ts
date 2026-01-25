@@ -18,17 +18,18 @@ import {
   deleteRoadPathProgress,
   calculateRoadPathStats,
 } from "@/lib/services/road-path-service";
+import { createAutomatedTasksForRoadPath } from "@/lib/services/task-automation-service";
 import {
   createRoadPathSchema,
   updateRoadPathSchema,
   createRoadPathMilestoneSchema,
   updateRoadPathMilestoneSchema,
   createRoadPathProgressSchema,
-  type CreateRoadPathData,
+  type CreateRoadPathInput,
   type UpdateRoadPathData,
   type CreateRoadPathMilestoneData,
   type UpdateRoadPathMilestoneData,
-  type CreateRoadPathProgressData,
+  type CreateRoadPathProgressInput,
 } from "@/schemas/road-path";
 
 export async function getUserRoadPathsAction() {
@@ -49,11 +50,26 @@ export async function getRoadPathAction(roadPathId: string) {
   return { success: true, data: path };
 }
 
-export async function createRoadPathAction(data: CreateRoadPathData) {
+export async function createRoadPathAction(data: CreateRoadPathInput) {
   const user = await requireAuth();
 
   const validated = createRoadPathSchema.parse(data);
-  const path = await createRoadPath(user.id, validated);
+  const { createFirstTask, ...roadPathData } = validated;
+  
+  const path = await createRoadPath(user.id, {
+    ...roadPathData,
+    autoCreateTasks: validated.autoCreateTasks ?? false,
+  });
+
+  // Create first task if requested and automation is enabled
+  if (createFirstTask && path.autoCreateTasks && path.taskFrequency) {
+    try {
+      await createAutomatedTasksForRoadPath(user.id, path.id);
+    } catch (error) {
+      console.error("Failed to create first task:", error);
+      // Don't fail the whole operation if task creation fails
+    }
+  }
 
   revalidatePath("/portal/productivity");
 
@@ -148,11 +164,14 @@ export async function getRoadPathProgressAction(
   return { success: true, data: progress };
 }
 
-export async function createRoadPathProgressAction(data: CreateRoadPathProgressData) {
+export async function createRoadPathProgressAction(data: CreateRoadPathProgressInput) {
   const user = await requireAuth();
 
   const validated = createRoadPathProgressSchema.parse(data);
-  const progress = await createRoadPathProgress(user.id, validated);
+  const progress = await createRoadPathProgress(user.id, {
+    ...validated,
+    date: validated.date ?? new Date(),
+  });
 
   revalidatePath("/portal/productivity");
 
