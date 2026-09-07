@@ -1540,7 +1540,7 @@ function MoveRecurringPrompt({
           <AlertDialogCancel className="sm:mr-auto">Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onEditDetails}
-            className="bg-background text-foreground ring-1 ring-border hover:bg-muted"
+            className="bg-card text-foreground ring-1 ring-border hover:bg-muted"
           >
             Edit details…
           </AlertDialogAction>

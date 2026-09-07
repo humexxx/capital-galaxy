@@ -311,7 +311,7 @@ function ShareRow({
       </InputGroup>
 
       {showQr && (
-        <div className="flex flex-col items-center gap-2 rounded-md border bg-background p-3">
+        <div className="flex flex-col items-center gap-2 rounded-md border bg-card p-3">
           {/* The code is a link, not a picture of one. A phone cannot scan
               its own screen, so on the device holding this the useful gesture
               is a long press — which only offers "open" and "copy" when the

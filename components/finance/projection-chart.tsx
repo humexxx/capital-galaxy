@@ -197,7 +197,7 @@ function PointTooltip(props: {
   const delta = ghost != null ? row.rawValue - ghost : null;
 
   return (
-    <div className="grid min-w-[10rem] gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+    <div className="grid min-w-[10rem] gap-1.5 rounded-lg border border-border/50 bg-popover px-2.5 py-1.5 text-xs shadow-xl">
       <div className="font-medium">{row.monthLabel}</div>
       <div className="grid gap-1">
         <TooltipRow
@@ -669,7 +669,7 @@ function ComparePlansTooltip(props: {
   if (!row) return null;
 
   return (
-    <div className="grid min-w-[10rem] gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl">
+    <div className="grid min-w-[10rem] gap-1.5 rounded-lg border border-border/50 bg-popover px-2.5 py-1.5 text-xs shadow-xl">
       <div className="font-medium">{String(row.month ?? "")}</div>
       <div className="grid gap-1">
         {seriesByPlan.map(({ proj, key }) => {

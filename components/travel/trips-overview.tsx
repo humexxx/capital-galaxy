@@ -314,7 +314,7 @@ function TripCalendar({ trips }: { trips: Trip[] }) {
               <div
                 key={key}
                 className={cn(
-                  "group relative min-h-22 bg-background p-1.5",
+                  "group relative min-h-22 bg-card p-1.5",
                   !inMonth && "bg-muted/20 text-muted-foreground"
                 )}
               >

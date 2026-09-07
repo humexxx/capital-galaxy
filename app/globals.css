@@ -29,6 +29,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -69,9 +71,15 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  /* 14px. iOS corners: cards land at rounded-xl = 18px, buttons and fields at
+     rounded-md = 12px, menus at rounded-lg = 14px. One token moves every
+     primitive, so nothing hand-picks a radius. */
+  --radius: 0.875rem;
 
-  /* Light theme colors */
+  /* Light theme — iOS "grouped" surfaces: a cool grey page
+     (systemGroupedBackground, #F2F2F7) with white cards floating on it, system
+     blue for actions, system red for destruction. The chart palette below is
+     NOT part of this and stays brand-validated. */
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -79,25 +87,28 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
 
-  --primary: oklch(0.61 0.11 222);
-  --primary-foreground: oklch(0.98 0.02 201);
+  --primary: oklch(0.62 0.2 255);       /* #007AFF systemBlue */
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.967 0.001 286.375);
+  --secondary: oklch(0.93 0.004 286);   /* #E5E5EA systemGray5 */
   --secondary-foreground: oklch(0.21 0.006 285.885);
 
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted: oklch(0.945 0.005 286);
+  --muted-foreground: oklch(0.6 0.012 286); /* secondaryLabel */
 
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.945 0.005 286);
   --accent-foreground: oklch(0.205 0 0);
 
-  --destructive: oklch(0.58 0.22 27);
+  --destructive: oklch(0.63 0.235 29);  /* #FF3B30 systemRed */
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
+  --success: oklch(0.72 0.19 150);      /* #34C759 systemGreen */
+  --success-foreground: oklch(1 0 0);
+
+  --border: oklch(0.9 0.005 286);
+  --input: oklch(0.9 0.005 286);
+  --ring: oklch(0.62 0.2 255);
+  --background: oklch(0.962 0.005 286); /* #F2F2F7 systemGroupedBackground */
   --foreground: oklch(0.145 0 0);
   /* Categorical series palette — identity, not magnitude. These slots colour
      SEPARATE things (one plan vs another, one trip vs another), so they are
@@ -130,45 +141,49 @@
   --chart-5: oklch(0.7644 0.1612 75.12);  /* #eda100 yellow */
   /* Sidebar sits flush with the page background, separated only by its right
      border — the shadcn docs look, rather than a tinted panel. */
-  --sidebar: oklch(1 0 0);
+  --sidebar: oklch(0.962 0.005 286);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.61 0.11 222);
-  --sidebar-primary-foreground: oklch(0.98 0.02 201);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-primary: oklch(0.62 0.2 255);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.91 0.006 286);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: oklch(0.9 0.005 286);
+  --sidebar-ring: oklch(0.62 0.2 255);
 }
 
 .dark {
-  /* Dark theme colors */
-  --background: oklch(0.145 0 0);
+  /* Dark theme — iOS dark: true black page (OLED), #1C1C1E cards, #2C2C2E
+     menus, the brighter dark-mode blue/red/green. */
+  --background: oklch(0 0 0);
   --foreground: oklch(0.985 0 0);
 
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.22 0.004 286);        /* #1C1C1E secondarySystemGroupedBackground */
   --card-foreground: oklch(0.985 0 0);
 
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.27 0.004 286);     /* #2C2C2E tertiary */
   --popover-foreground: oklch(0.985 0 0);
 
-  --primary: oklch(0.71 0.13 215);
-  --primary-foreground: oklch(0.30 0.05 230);
+  --primary: oklch(0.67 0.19 255);      /* #0A84FF */
+  --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.274 0.006 286.033);
+  --secondary: oklch(0.3 0.005 286);    /* #3A3A3C */
   --secondary-foreground: oklch(0.985 0 0);
 
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: oklch(0.27 0.004 286);
+  --muted-foreground: oklch(0.65 0.01 286);
 
-  --accent: oklch(0.371 0 0);
+  --accent: oklch(0.32 0.005 286);
   --accent-foreground: oklch(0.985 0 0);
 
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.68 0.21 27);   /* #FF453A */
   --destructive-foreground: oklch(0.985 0 0);
 
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --success: oklch(0.76 0.2 150);       /* #30D158 */
+  --success-foreground: oklch(0.15 0 0);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.67 0.19 255);
   /* Same five hues, re-stepped for the dark card surface (#343434) — a
      selected dark palette, not an automatic flip of the light one. Verified:
      CVD ΔE 13.2 (target ≥8) · normal-vision ΔE 19.3 (floor ≥15). */
@@ -188,14 +203,14 @@
   --chart-5: oklch(0.6699 0.1425 73.23);  /* #c98500 yellow */
   /* Match the page background in dark mode too, so the sidebar reads as part
      of the shell instead of a lighter floating panel. */
-  --sidebar: oklch(0.145 0 0);
+  --sidebar: oklch(0 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.80 0.13 212);
-  --sidebar-primary-foreground: oklch(0.30 0.05 230);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-primary: oklch(0.67 0.19 255);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.22 0.004 286);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.67 0.19 255);
 }
 
 /* * {
@@ -217,6 +232,12 @@ body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv11" 1;
     text-rendering: optimizeLegibility;
+    /* Native apps do not flash a grey box under a tap. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    @apply bg-primary/20;
   }
 
   /* Horizontal overscroll is never wanted: it chains into the browser's

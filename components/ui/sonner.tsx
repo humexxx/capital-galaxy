@@ -19,7 +19,7 @@ export function Toaster(props: ToasterProps) {
       closeButton
       toastOptions={{
         classNames: {
-          toast: "font-sans",
+          toast: "font-sans rounded-2xl! shadow-lg!",
           description: "text-muted-foreground",
         },
       }}

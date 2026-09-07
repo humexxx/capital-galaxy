@@ -183,7 +183,7 @@ export function ProjectionTable({ projection, monthsToShow }: ProjectionTablePro
               wall of currency, and 14px numerals made every column shout. The
               header steps with it so the grid still reads as one block. */}
           <Table className="text-xs">
-            <TableHeader className="sticky top-0 bg-background">
+            <TableHeader className="sticky top-0 bg-card">
               <TableRow>
                 <TableHead className="w-20">Month</TableHead>
                 <TableHead className="text-right">Income</TableHead>

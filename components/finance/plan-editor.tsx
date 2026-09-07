@@ -626,7 +626,7 @@ export function PlanEditor({
                 This wrapper is what it positions against. */}
             <div className="relative flex min-h-0 flex-col lg:flex-1">
               {isPreview && (
-                <div className="pointer-events-none absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full border bg-background px-2.5 py-0.5 text-2xs font-medium shadow-sm">
+                <div className="pointer-events-none absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 rounded-full border bg-popover px-2.5 py-0.5 text-2xs font-medium shadow-sm">
                   {hoverFigures.label}
                 </div>
               )}
@@ -1113,7 +1113,7 @@ function ViewSwitcher({
             onClick={() => onChange(v)}
             className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition ${
               active
-                ? "bg-background text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -1757,7 +1757,7 @@ function ProjectionPanel({
             aria-pressed={showGhost}
             className={`rounded-md border px-2.5 py-1.5 text-xs font-medium transition ${
               showGhost
-                ? "bg-background text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm"
                 : "bg-muted/30 text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -1781,7 +1781,7 @@ function ProjectionPanel({
                 aria-pressed={active}
                 className={`rounded px-2.5 py-1 text-xs font-medium transition ${
                   active
-                    ? "bg-background text-foreground shadow-sm"
+                    ? "bg-card text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 } ${disabled ? "cursor-not-allowed opacity-40" : ""}`}
               >
