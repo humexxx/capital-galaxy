@@ -1,6 +1,6 @@
 import type { Projection } from "@/types/finance";
 
-import { periodIndexForDate } from "./period";
+import { periodIndexForDate, periodStartFor } from "./period";
 
 /** One real recorded monthly snapshot point (from `getRecentMonthlySnapshots`),
  *  used to draw the chart's past from actuals rather than a re-simulation. */
@@ -159,13 +159,17 @@ export function buildChartSeries(
   const todayIdx = base ? periodIndexForDate(base, anchorDay, today) : 0;
 
   // Real past: snapshots whose period closed before today's period, latest
-  // `pastBudget` of them.
+  // `pastBudget` of them. Each point is dated at its PERIOD start, like the
+  // projection's own rows — a snapshot taken on Sep 4 inside the Aug-5 period
+  // used to print as "Sep", right next to today's "Sep" period, so the axis
+  // read the same month twice for two different periods.
+  const effAnchor = anchorDay > 0 ? anchorDay : 1;
   const past = base
     ? history
         .filter((h) => periodIndexForDate(base, anchorDay, h.date) < todayIdx)
         .slice(-pastBudget)
         .map((h) => ({
-          date: h.date,
+          date: periodStartFor(h.date, effAnchor),
           netWorth: h.netWorth,
           totalDebt: h.totalDebt,
           investments: h.investments,

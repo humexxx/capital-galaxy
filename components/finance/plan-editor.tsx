@@ -114,6 +114,7 @@ import {
   computeProjectionWindow,
   mapGhostValues,
   mapPortfolioValues,
+  type ChartPoint,
   type PlanHistoryPoint,
 } from "@/lib/finance/chart-series";
 import type {
@@ -1255,8 +1256,43 @@ function readDateParts(
 
 type TodaySnapshot = {
   netWorth: number;
+  totalDebt: number;
+  investments: number;
   monthDate: Date;
 };
+
+/**
+ * Puts the day-aware "today" figures onto the chart's today point.
+ *
+ * `buildChartSeries` draws today from `projection.months[today]`, which is the
+ * period's CLOSE — every flow of the period already applied. The Today KPI is
+ * `computeTodaySnapshot`, the position as of this morning. Both were labelled
+ * "today" and disagreed by a paycheque, so the dot (and its tooltip) now carry
+ * the KPI's numbers and the dashed forecast sets off from where the reader
+ * actually stands. No-op when today falls outside the projection.
+ */
+function alignTodayPoint(
+  series: { points: ChartPoint[]; pastCount: number },
+  snapshot: TodaySnapshot | null,
+  anchorDay: number
+): { points: ChartPoint[]; pastCount: number } {
+  if (!snapshot) return series;
+  const point = series.points[series.pastCount];
+  if (
+    !point ||
+    periodIndexForDate(point.date, anchorDay > 0 ? anchorDay : 1, snapshot.monthDate) !== 0
+  ) {
+    return series;
+  }
+  const points = series.points.slice();
+  points[series.pastCount] = {
+    ...point,
+    netWorth: snapshot.netWorth,
+    totalDebt: snapshot.totalDebt,
+    investments: snapshot.investments,
+  };
+  return { points, pastCount: series.pastCount };
+}
 
 // Day-precise window check: is the hit date (year, monthIdx, day) on/after
 // startISO and on/before endISO? Either bound is optional. Lives at module
@@ -1421,6 +1457,8 @@ function computeTodaySnapshot(
 
   return {
     netWorth: savings + investments + portfolioValue - totalDebt,
+    totalDebt,
+    investments,
     monthDate: currentMonth.date,
   };
 }
@@ -1481,15 +1519,28 @@ function ProjectionPanel({
     anchorDay
   );
 
+  // Day-aware "today" net worth: strips income/expense from the period-end
+  // value when they haven't actually hit yet (e.g. paycheque on day 30 when
+  // today is day 25). Null when we're outside the projection range.
+  // Refined against the CALIBRATED baseline — its startMonth + initials match
+  // the projection we're refining, so period indexing and the period-0 seed
+  // line up with confirmed reality.
+  const todaySnapshot = computeTodaySnapshot(baseline, projection, anchorDay);
+
   // Chart series: real snapshots for the past, calibrated projection for the
   // future. Falls back to the projection-only window when there's no history.
-  const chartSeries = buildChartSeries(
-    history,
-    projection,
-    horizonMonths,
-    new Date(),
-    anchorDay,
-    pastProjection
+  // Today's point carries the same figures as the Today KPI.
+  const chartSeries = alignTodayPoint(
+    buildChartSeries(
+      history,
+      projection,
+      horizonMonths,
+      new Date(),
+      anchorDay,
+      pastProjection
+    ),
+    todaySnapshot,
+    anchorDay
   );
 
   // Scenario ghost: the base plan's net worth aligned to this chart's points
@@ -1595,14 +1646,7 @@ function ProjectionPanel({
   const nextMonth = projection.months[todayMonthIdx + 1];
   const futureMonth =
     projection.months[window.startIndex + window.count - 1] ?? todayMonth;
-  // Day-aware "today" net worth: strips income/expense from the period-end
-  // value when they haven't actually hit yet (e.g. paycheque on day 30 when
-  // today is day 25). Falls back to period-end when we're outside the
-  // projection range.
-  // Refine against the CALIBRATED baseline — its startMonth + initials match
-  // the projection we're refining, so period indexing and the period-0 seed
-  // line up with confirmed reality.
-  const todaySnapshot = computeTodaySnapshot(baseline, projection, anchorDay);
+  // Falls back to the period close when today sits outside the projection.
   const today = todaySnapshot?.netWorth ?? todayMonth?.netWorth ?? 0;
   const next = nextMonth?.netWorth;
   const future = futureMonth?.netWorth ?? today;

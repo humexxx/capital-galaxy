@@ -100,6 +100,24 @@ describe("buildChartSeries", () => {
     expect(points.map((p) => p.netWorth)).toEqual([200, 250, 290]);
   });
 
+  it("dates a past snapshot at its period start so the axis names each period once", () => {
+    // Anchor day 5: the Aug-5 period runs Aug 5 – Sep 4. Its closing snapshot is
+    // dated Sep 4 and used to label as "Sep" beside today's Sep-5 period.
+    const history = [snap(utc(2026, 8, 4), 200)]; // Sep 4, inside the Aug-5 period
+    const proj = projectionOf([
+      { date: utc(2026, 7, 5), netWorth: 210 }, // Aug-5 period
+      { date: utc(2026, 8, 5), netWorth: 250 }, // Sep-5 period (today)
+      { date: utc(2026, 9, 5), netWorth: 290 }, // Oct-5 period
+    ]);
+
+    const { points, pastCount } = buildChartSeries(history, proj, 12, utc(2026, 8, 7), 5);
+
+    expect(pastCount).toBe(1);
+    expect(points[0].date).toEqual(utc(2026, 7, 5)); // Aug-5, not Sep 4
+    expect(points[0].netWorth).toBe(200);
+    expect(points[1].date).toEqual(utc(2026, 8, 5));
+  });
+
   it("caps the past at pastBudget = round(horizon * 0.25)", () => {
     const history = [
       snap(utc(2026, 2, 28), 1), // Mar
