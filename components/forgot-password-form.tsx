@@ -69,7 +69,7 @@ export function ForgotPasswordForm({
         )}
 
         {success && (
-          <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2 text-center text-sm text-emerald-700 dark:text-emerald-300" aria-live="polite">
+          <div className="rounded border border-success/30 bg-success/10 p-2 text-center text-sm text-success" aria-live="polite">
             Check your email for the password reset link.
           </div>
         )}

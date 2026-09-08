@@ -38,7 +38,7 @@ export function LandingHero() {
           href="#modules"
           className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full border bg-background/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur transition-colors hover:text-foreground"
         >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" />
           Beta · six modules in one orbit
           <ArrowRight className="h-3 w-3" />
         </Link>
@@ -85,7 +85,7 @@ export function LandingHero() {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span className="h-2 w-2 rounded-full bg-red-400" />
                 <span className="h-2 w-2 rounded-full bg-yellow-400" />
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="h-2 w-2 rounded-full bg-success" />
                 <Mono className="ml-3 text-muted-foreground">
                   allstars-galaxy.app/portfolio
                 </Mono>
@@ -113,7 +113,7 @@ export function LandingHero() {
                   <div className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
                     {kpi.value}
                   </div>
-                  <div className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                  <div className="mt-1 text-xs text-success">
                     {kpi.delta}
                   </div>
                 </div>

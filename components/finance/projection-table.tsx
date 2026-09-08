@@ -225,7 +225,7 @@ export function ProjectionTable({ projection, monthsToShow }: ProjectionTablePro
                       const isPositive = net > 0;
                       return (
                         <Mono
-                          className={isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+                          className={isPositive ? "text-success" : "text-destructive"}
                           title={`Earned ${formatCurrency(m.investmentsInterest + m.savingsInterest)} · Paid ${formatCurrency(m.totalInterestAccrued)}`}
                         >
                           {isPositive ? "+" : "−"}
@@ -245,8 +245,8 @@ export function ProjectionTable({ projection, monthsToShow }: ProjectionTablePro
                   <TableCell
                     className={`text-right font-mono font-semibold tabular-nums ${
                       m.netWorth >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
+                        ? "text-success"
+                        : "text-destructive"
                     }`}
                   >
                     {formatCurrency(m.netWorth)}

@@ -76,8 +76,8 @@ const DEFAULT_RANGE = "24";
 /** Periods before today kept in view, regardless of the horizon picked. */
 const PAST_MONTHS = 3;
 
-const POSITIVE = "text-emerald-600 dark:text-emerald-400";
-const NEGATIVE = "text-rose-600 dark:text-rose-400";
+const POSITIVE = "text-success";
+const NEGATIVE = "text-destructive";
 
 /**
  * Polymarket-style plans workspace: a giant comparison chart on the left and a

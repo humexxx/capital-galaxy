@@ -24,9 +24,9 @@ type StandingsTableProps = {
 const BAND_STYLES: Record<string, string> = {
   champions: "bg-sky-500",
   europa: "bg-orange-500",
-  conference: "bg-emerald-500",
-  playoff: "bg-amber-500",
-  relegation: "bg-rose-500",
+  conference: "bg-success",
+  playoff: "bg-warning",
+  relegation: "bg-destructive",
 };
 
 export function StandingsTable({
@@ -109,7 +109,7 @@ export function StandingsTable({
                 <TableCellNum value={row.goalsAgainst} />
                 <TableCellNum
                   value={`${goalDiff >= 0 ? "+" : ""}${goalDiff}`}
-                  className={goalDiff >= 0 ? "text-foreground" : "text-rose-500"}
+                  className={goalDiff >= 0 ? "text-foreground" : "text-destructive"}
                 />
                 <TableCell className="text-center">
                   <Mono className="text-sm font-semibold tabular-nums">{row.points}</Mono>

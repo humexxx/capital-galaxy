@@ -109,7 +109,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
       <TableCell>
         {transaction.approvedBy && transaction.approvedAt && (
           <div className="flex flex-col text-sm">
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="font-medium text-success">
               {transaction.approvedBy.fullName || transaction.approvedBy.email}
             </span>
             <Mono className="text-xs text-muted-foreground">
@@ -119,7 +119,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
         )}
         {transaction.rejectedBy && transaction.rejectedAt && (
           <div className="flex flex-col text-sm">
-            <span className="font-medium text-rose-600 dark:text-rose-400">
+            <span className="font-medium text-destructive">
               {transaction.rejectedBy.fullName || transaction.rejectedBy.email}
             </span>
             <Mono className="text-xs text-muted-foreground">
@@ -139,7 +139,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-8 w-8 text-emerald-600 dark:text-emerald-400"
+                  className="h-8 w-8 text-success"
                   aria-label={`Approve $${transaction.amount} ${transaction.type} for ${userDisplayName}`}
                   disabled={isPending}
                 >
@@ -172,7 +172,7 @@ export function TransactionRow({ transaction }: TransactionRowProps) {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-8 w-8 text-rose-600 dark:text-rose-400"
+                  className="h-8 w-8 text-destructive"
                   aria-label={`Reject $${transaction.amount} ${transaction.type} for ${userDisplayName}`}
                   disabled={isPending}
                 >

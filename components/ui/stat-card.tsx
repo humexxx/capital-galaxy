@@ -37,8 +37,8 @@ export function maskValue(value: string): string {
 }
 
 export function statToneClass(tone?: StatCardTone): string {
-  if (tone === "positive") return "text-emerald-600 dark:text-emerald-400";
-  if (tone === "negative") return "text-rose-600 dark:text-rose-400";
+  if (tone === "positive") return "text-success";
+  if (tone === "negative") return "text-destructive";
   return "";
 }
 

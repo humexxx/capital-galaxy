@@ -28,9 +28,9 @@ type BoardTaskCardProps = {
 };
 
 const PRIORITY_STYLES: Record<TaskPriority, { bar: string; label: string; tone: string }> = {
-  low: { bar: "bg-emerald-500", label: "Low", tone: "text-emerald-600 dark:text-emerald-400" },
-  medium: { bar: "bg-amber-500", label: "Medium", tone: "text-amber-600 dark:text-amber-400" },
-  high: { bar: "bg-rose-500", label: "High", tone: "text-rose-600 dark:text-rose-400" },
+  low: { bar: "bg-success", label: "Low", tone: "text-success" },
+  medium: { bar: "bg-warning", label: "Medium", tone: "text-warning" },
+  high: { bar: "bg-destructive", label: "High", tone: "text-destructive" },
 };
 
 export function BoardTaskCard({

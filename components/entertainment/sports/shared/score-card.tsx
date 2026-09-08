@@ -91,7 +91,7 @@ export function ScoreCard({ match, teams, className }: ScoreCardProps) {
         <span
           className={cn(
             "inline-flex items-center gap-1 text-2xs font-medium uppercase tracking-wide text-muted-foreground",
-            isLive && "text-emerald-600",
+            isLive && "text-success",
           )}
         >
           {isLive && <Circle className="h-2 w-2 animate-pulse fill-current" />}
@@ -141,7 +141,7 @@ function TeamRow({
           {team.shortName}
         </span>
         {redCard && (
-          <span className="h-3 w-2 rounded-xs bg-rose-600" aria-label="Red card" />
+          <span className="h-3 w-2 rounded-xs bg-destructive" aria-label="Red card" />
         )}
       </div>
       {!scheduled && score !== null && (

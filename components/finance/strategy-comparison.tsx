@@ -39,7 +39,7 @@ export function StrategyComparisonCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-amber-500" />
+              <Zap className="h-5 w-5 text-warning" />
               Debt payoff strategy
             </CardTitle>
             <Text variant="muted" className="mt-1">
@@ -47,7 +47,7 @@ export function StrategyComparisonCard({
             </Text>
           </div>
           {comparison.interestSaved > 0 && (
-            <Badge variant="outline" className="gap-1 border-emerald-500/30 bg-emerald-500/10 font-mono tabular-nums text-emerald-700 dark:text-emerald-300">
+            <Badge variant="outline" className="gap-1 border-success/30 bg-success/10 font-mono tabular-nums text-success">
               <TrendingDown className="h-3 w-3" />
               {STRATEGY_LABEL[comparison.recommended]} saves {formatCurrency(comparison.interestSaved)}
             </Badge>
@@ -65,7 +65,7 @@ export function StrategyComparisonCard({
                 key={key}
                 className={`relative rounded-md border p-4 ${
                   isCurrent ? "border-foreground" : ""
-                } ${isBest && key !== "none" ? "bg-emerald-500/10" : ""}`}
+                } ${isBest && key !== "none" ? "bg-success/10" : ""}`}
               >
                 <div className="flex items-center justify-between">
                   <Heading level="h6" as="p">{STRATEGY_LABEL[key]}</Heading>

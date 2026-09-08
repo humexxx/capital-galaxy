@@ -219,13 +219,13 @@ function Movement({ movement }: { movement: number }) {
   }
   if (movement > 0) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-emerald-600">
+      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-success">
         <ArrowUp className="h-3 w-3" /> {movement}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-0.5 text-xs font-medium text-rose-600">
+    <span className="inline-flex items-center gap-0.5 text-xs font-medium text-destructive">
       <ArrowDown className="h-3 w-3" /> {Math.abs(movement)}
     </span>
   );
@@ -260,7 +260,7 @@ function TournamentsList({ data }: { data: RacquetData }) {
             </Mono>
             {t.champion && (
               <div className="flex items-center gap-2 border-t pt-2 text-xs">
-                <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                <Trophy className="h-3.5 w-3.5 text-warning" />
                 <span className="font-medium">{t.champion}</span>
                 {t.runnerUp && (
                   <>

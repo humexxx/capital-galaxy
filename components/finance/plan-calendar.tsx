@@ -1272,15 +1272,15 @@ export function PlanCalendar({
 
         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
-            <span className="inline-block size-2 rounded-full bg-emerald-500" />
+            <span className="inline-block size-2 rounded-full bg-success" />
             Income
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block size-2 rounded-full bg-amber-500" />
+            <span className="inline-block size-2 rounded-full bg-warning" />
             Expense
           </span>
           <span className="flex items-center gap-1">
-            <span className="inline-block size-2 rounded-full bg-rose-500" />
+            <span className="inline-block size-2 rounded-full bg-destructive" />
             Debt
           </span>
           <span className="ml-auto text-2xs italic text-muted-foreground/70">
@@ -1629,8 +1629,8 @@ function SummaryTile({
     good === null
       ? "text-muted-foreground"
       : good
-        ? "text-emerald-600 dark:text-emerald-400"
-        : "text-rose-600 dark:text-rose-400";
+        ? "text-success"
+        : "text-destructive";
   const arrow = direction === "up" ? "▲" : direction === "down" ? "▼" : "·";
 
   const displayValue = signedValue
@@ -1638,8 +1638,8 @@ function SummaryTile({
     : formatCurrency(value);
   const valueColor = signedValue
     ? value >= 0
-      ? "text-emerald-700 dark:text-emerald-300"
-      : "text-rose-700 dark:text-rose-300"
+      ? "text-success"
+      : "text-destructive"
     : "";
 
   return (
@@ -1755,7 +1755,7 @@ function CalendarCell({
         muted ? "bg-muted/30 text-muted-foreground/60" : "bg-card"
       } ${
         isAnchor && !muted
-          ? "border-amber-400/60 bg-amber-50 dark:bg-amber-950/30"
+          ? "border-warning/60 bg-warning/10"
           : ""
       } ${
         isDragOver ? "border-primary/70 bg-primary/5 ring-1 ring-primary/50" : ""
@@ -1798,7 +1798,7 @@ function CalendarCell({
               onClick={() => onAdd("income")}
               className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
             >
-              <span className="inline-block size-2 rounded-full bg-emerald-500" />
+              <span className="inline-block size-2 rounded-full bg-success" />
               Add income
             </button>
             <button
@@ -1806,7 +1806,7 @@ function CalendarCell({
               onClick={() => onAdd("expense")}
               className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
             >
-              <span className="inline-block size-2 rounded-full bg-amber-500" />
+              <span className="inline-block size-2 rounded-full bg-warning" />
               Add expense
             </button>
           </PopoverContent>
@@ -1983,10 +1983,10 @@ function EntryChip({
 
 function chipPalette(side: EntrySide): string {
   return side === "income"
-    ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+    ? "bg-success/10 text-success"
     : side === "expense"
-      ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
-      : "bg-rose-500/10 text-rose-700 dark:text-rose-300";
+      ? "bg-warning/10 text-warning"
+      : "bg-destructive/10 text-destructive";
 }
 
 // Listing of entries hidden behind "+N more" plus a per-side / net total for
@@ -2012,10 +2012,10 @@ function HiddenEntriesTooltipBody({ allEntries }: { allEntries: DayEntry[] }) {
               <span
                 className={`inline-block size-1.5 shrink-0 rounded-full ${
                   e.side === "income"
-                    ? "bg-emerald-500"
+                    ? "bg-success"
                     : e.side === "expense"
-                      ? "bg-amber-500"
-                      : "bg-rose-500"
+                      ? "bg-warning"
+                      : "bg-destructive"
                 }`}
                 aria-hidden
               />
@@ -2033,17 +2033,17 @@ function HiddenEntriesTooltipBody({ allEntries }: { allEntries: DayEntry[] }) {
           Day total
         </div>
         {totals.income > 0 && (
-          <TotalRow label="Income" amount={totals.income} sign="+" color="text-emerald-400" />
+          <TotalRow label="Income" amount={totals.income} sign="+" color="text-success" />
         )}
         {totals.expense > 0 && (
-          <TotalRow label="Expense" amount={totals.expense} sign="−" color="text-amber-400" />
+          <TotalRow label="Expense" amount={totals.expense} sign="−" color="text-warning" />
         )}
         {totals.debt > 0 && (
-          <TotalRow label="Debt" amount={totals.debt} sign="−" color="text-rose-400" />
+          <TotalRow label="Debt" amount={totals.debt} sign="−" color="text-destructive" />
         )}
         <div className="flex items-baseline justify-between gap-3 border-t border-background/20 pt-1 font-semibold">
           <span>Net</span>
-          <Mono className={net >= 0 ? "text-emerald-400" : "text-rose-400"}>
+          <Mono className={net >= 0 ? "text-success" : "text-destructive"}>
             {net >= 0 ? "+" : "−"}
             {formatCurrency(Math.abs(net))}
           </Mono>

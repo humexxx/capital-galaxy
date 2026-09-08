@@ -118,8 +118,8 @@ export function MarginChart({
             className={cn(
               "text-2xl font-semibold tabular-nums sm:text-3xl",
               latest.margin >= 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400"
+                ? "text-success"
+                : "text-destructive"
             )}
           >
             {money(latest.margin)}

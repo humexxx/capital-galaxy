@@ -45,17 +45,17 @@ const RISK_BADGE: Record<RiskTone, { label: string; className: string }> = {
   low: {
     label: "Low risk",
     className:
-      "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
+      "bg-success/15 text-success border-success/30",
   },
   medium: {
     label: "Medium risk",
     className:
-      "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30",
+      "bg-warning/15 text-warning border-warning/30",
   },
   high: {
     label: "High risk",
     className:
-      "bg-rose-500/15 text-rose-700 dark:text-rose-400 border-rose-500/30",
+      "bg-destructive/15 text-destructive border-destructive/30",
   },
 };
 
@@ -232,7 +232,7 @@ function MethodCard({
             <Mono
               className={cn(
                 "block text-2xl font-semibold",
-                roi >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                roi >= 0 ? "text-success" : "text-destructive"
               )}
             >
               {Number.isFinite(roi) ? `${roi.toFixed(2)}%` : "—"}

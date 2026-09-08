@@ -140,7 +140,7 @@ function ToneBadge({ tone }: { tone?: DashboardSportHighlight["tone"] }) {
   if (!tone) return null;
   if (tone === "live") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-2xs font-medium text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-2 py-0.5 text-2xs font-medium text-success">
         <Circle className="h-2 w-2 animate-pulse fill-current" /> Live
       </span>
     );

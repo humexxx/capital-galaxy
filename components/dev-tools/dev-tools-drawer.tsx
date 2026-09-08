@@ -50,8 +50,8 @@ export function DevToolsDrawer() {
         onClick={() => setOpen(true)}
         className={cn(
           "fixed bottom-4 right-4 z-40 h-10 w-10 rounded-full shadow-lg",
-          "border border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20",
-          "dark:text-amber-400"
+          "border border-warning/40 bg-warning/10 text-warning hover:bg-warning/20",
+          ""
         )}
       >
         <Wrench className="h-4 w-4" />
@@ -60,7 +60,7 @@ export function DevToolsDrawer() {
         <SheetContent side="right" className="flex w-full flex-col gap-0 sm:max-w-sm">
           <SheetHeader className="border-b">
             <SheetTitle className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-amber-500" /> Dev tools
+              <Wrench className="h-4 w-4 text-warning" /> Dev tools
             </SheetTitle>
             <SheetDescription>
               Page-scoped helpers — only visible in development.

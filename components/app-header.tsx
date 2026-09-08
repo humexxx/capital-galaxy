@@ -74,7 +74,7 @@ export function AppHeader({
         // a solid fallback where backdrop-filter isn't supported. The only time
         // we frame it is while impersonating, to keep that state obvious.
         isImpersonating
-          ? "border-b border-amber-500/40 bg-amber-100/70 dark:bg-amber-500/15"
+          ? "border-b border-warning/40 bg-warning/15"
           : "bg-background/95 supports-[backdrop-filter]:bg-background/60 backdrop-blur"
       )}
     >
@@ -107,16 +107,16 @@ export function AppHeader({
           <div className="flex items-center gap-2">
             <Badge
               variant="outline"
-              className="border-amber-500/60 bg-background/60 text-amber-700 dark:text-amber-200"
+              className="border-warning/60 bg-background/60 text-warning"
             >
               <UserCog className="mr-1 h-3 w-3" />
               Impersonating
             </Badge>
-            <span className="text-sm font-medium text-amber-900 dark:text-amber-100">
+            <span className="text-sm font-medium text-foreground">
               {impersonatedDisplayName}
             </span>
             {impersonatedUser?.email && impersonatedUser?.fullName && (
-              <span className="hidden text-xs text-amber-900/70 dark:text-amber-100/70 sm:inline">
+              <span className="hidden text-xs text-foreground/70 sm:inline">
                 ({impersonatedUser.email})
               </span>
             )}
@@ -131,7 +131,7 @@ export function AppHeader({
             size="sm"
             onClick={handleStop}
             disabled={isStopping}
-            className="border-amber-500/60 bg-background/60 text-amber-900 hover:bg-amber-500/20 dark:text-amber-100"
+            className="border-warning/60 bg-background/60 text-warning hover:bg-warning/20"
           >
             <X className="mr-1 h-3.5 w-3.5" />
             {isStopping ? "Stopping…" : "Stop impersonating"}

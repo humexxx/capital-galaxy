@@ -31,16 +31,16 @@ function statusFor(ratio: number, hasIncome: boolean): Status {
   if (!hasIncome)
     return { label: "No income", tone: "muted", stroke: "currentColor" };
   if (ratio < GREEN_THRESHOLD)
-    return { label: "Healthy", tone: "positive", stroke: "#16a34a" };
+    return { label: "Healthy", tone: "positive", stroke: "var(--success)" };
   if (ratio < YELLOW_THRESHOLD)
-    return { label: "Caution", tone: "warning", stroke: "#f59e0b" };
-  return { label: "Stretched", tone: "negative", stroke: "#dc2626" };
+    return { label: "Caution", tone: "warning", stroke: "var(--warning)" };
+  return { label: "Stretched", tone: "negative", stroke: "var(--destructive)" };
 }
 
 const TONE_TEXT: Record<Status["tone"], string> = {
-  positive: "text-emerald-600 dark:text-emerald-400",
-  warning: "text-amber-600 dark:text-amber-400",
-  negative: "text-rose-600 dark:text-rose-400",
+  positive: "text-success",
+  warning: "text-warning",
+  negative: "text-destructive",
   muted: "text-muted-foreground",
 };
 

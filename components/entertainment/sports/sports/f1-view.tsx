@@ -184,7 +184,7 @@ export function F1View({ data, news = [] }: F1ViewProps) {
                   </Mono>
                   {race.podium && (
                     <div className="mt-1 flex items-center gap-2 border-t pt-2 text-xs">
-                      <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                      <Trophy className="h-3.5 w-3.5 text-warning" />
                       <Mono className="font-medium">{race.podium[0]}</Mono>
                       <span className="text-muted-foreground">·</span>
                       <Mono>{race.podium[1]}</Mono>

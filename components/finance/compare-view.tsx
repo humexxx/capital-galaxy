@@ -137,7 +137,7 @@ export function CompareView({
                   <div className="flex justify-between border-t pt-1 font-semibold">
                     <dt>Net worth</dt>
                     <dd>
-                      <Mono className={p.endingNetWorth >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
+                      <Mono className={p.endingNetWorth >= 0 ? "text-success" : "text-destructive"}>
                         {formatCurrency(p.endingNetWorth)}
                       </Mono>
                     </dd>

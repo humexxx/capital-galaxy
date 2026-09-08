@@ -10,9 +10,9 @@ type Last5FormProps = {
 };
 
 const COLOR_MAP: Record<FormResult, string> = {
-  W: "bg-emerald-600/90 text-white",
-  L: "bg-rose-600/90 text-white",
-  D: "bg-amber-500/90 text-white",
+  W: "bg-success/90 text-white",
+  L: "bg-destructive/90 text-white",
+  D: "bg-warning/90 text-white",
   "-": "bg-muted text-muted-foreground",
 };
 

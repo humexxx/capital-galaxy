@@ -43,7 +43,7 @@ const CATEGORIES: Category[] = [
     label: "Finance",
     blurb: "Defaults for your plans and projection charts.",
     icon: Wallet,
-    tint: "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400",
+    tint: "bg-success/12 text-success",
     render: (p) => <FinanceSettings milestones={p.financeMilestones} />,
   },
 ];

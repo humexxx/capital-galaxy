@@ -125,7 +125,7 @@ function SportSelector({
             {isFav && (
               <Star
                 aria-hidden
-                className="h-3 w-3 fill-amber-400 text-amber-400"
+                className="h-3 w-3 fill-warning text-warning"
                 strokeWidth={2}
               />
             )}

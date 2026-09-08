@@ -146,8 +146,8 @@ export async function DashboardFinanceCard({ userId }: DashboardFinanceCardProps
               className={cn(
                 "gap-1 font-mono tabular-nums",
                 delta >= 0
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                  : "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                  ? "border-success/30 bg-success/10 text-success"
+                  : "border-destructive/30 bg-destructive/10 text-destructive"
               )}
             >
               <TrendingUp className="h-3 w-3" />
@@ -194,8 +194,8 @@ function KpiTile({
       <Mono
         className={cn(
           "mt-1 block text-lg font-semibold tabular-nums sm:text-xl",
-          tone === "positive" && "text-emerald-600 dark:text-emerald-400",
-          tone === "negative" && "text-rose-600 dark:text-rose-400",
+          tone === "positive" && "text-success",
+          tone === "negative" && "text-destructive",
           tone === "primary" && "text-primary"
         )}
       >

@@ -35,8 +35,8 @@ import {
 // Deterministic per-app gradient — used when no screenshot is available.
 const GRADIENT_BY_SLUG: Record<string, string> = {
   "cv-galaxy": "from-sky-500 to-cyan-500",
-  "padel-galaxy": "from-emerald-500 to-teal-500",
-  "trim-success": "from-orange-500 to-rose-500",
+  "padel-galaxy": "from-success to-teal-500",
+  "trim-success": "from-orange-500 to-destructive",
   lixcore: "from-violet-500 to-purple-500",
 };
 
@@ -180,7 +180,7 @@ export function AppCard({
               aria-hidden="true"
               className={cn(
                 "inline-block size-1.5 rounded-full",
-                isLive ? "bg-emerald-500" : "bg-muted-foreground/40"
+                isLive ? "bg-success" : "bg-muted-foreground/40"
               )}
             />
             {isLive ? "Live" : "Coming soon"}

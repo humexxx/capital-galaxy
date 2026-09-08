@@ -40,8 +40,8 @@ export function PortfolioAssetsTable({ assets }: PortfolioAssetsTableProps) {
 function AssetRow({ asset }: { asset: PortfolioAsset }) {
   const positive = asset.profitLoss >= 0;
   const profitTone = positive
-    ? "text-emerald-600 dark:text-emerald-400"
-    : "text-rose-600 dark:text-rose-400";
+    ? "text-success"
+    : "text-destructive";
   const Trend = positive ? TrendingUp : TrendingDown;
 
   const holdingAmountVisible = asset.holdingAmount > 0;

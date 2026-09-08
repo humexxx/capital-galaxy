@@ -158,8 +158,11 @@ computed height, not a spacing step.
 - **Press feedback.** `Button` dims and shrinks a touch on `:active`; do not add
   a second hover-only affordance on top of it.
 - **System colours.** `--primary` is system blue, `--destructive` system red,
-  `--success` system green (the on-state of `Switch`). The chart palette is
-  separate and validated; it does not follow these.
+  `--success` system green (the on-state of `Switch`), `--warning` system
+  orange. Status text and tints use these tokens (`text-success`,
+  `bg-destructive/10`, `border-warning/40`), never raw `emerald-*` / `rose-*` /
+  `amber-*` steps — the tokens already carry their dark-mode value. The chart
+  palette is separate and validated; it does not follow these.
 
 ## Adding a new step
 

@@ -45,8 +45,8 @@ const ROWS: Row[] = [
   { label: "Total debt", polarity: "less-is-better", read: (m) => m.totalDebt },
 ];
 
-const BETTER = "text-emerald-700 dark:text-emerald-300";
-const WORSE = "text-rose-700 dark:text-rose-300";
+const BETTER = "text-success";
+const WORSE = "text-destructive";
 
 export function PeriodCompareDialog({
   open,

@@ -13,7 +13,7 @@ export function StatusPill({
         status === "completed" && "bg-muted text-muted-foreground",
         status === "upcoming" && "bg-sky-500/15 text-sky-600 dark:text-sky-400",
         status === "live" &&
-          "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+          "bg-success/15 text-success",
       )}
     >
       {status}

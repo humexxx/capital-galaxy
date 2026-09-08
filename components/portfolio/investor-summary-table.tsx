@@ -127,7 +127,7 @@ export function InvestorSummaryTable({
               <TableCell className="text-right">
                 <Mono className="text-xs font-medium tabular-nums">{money(r.owed)}</Mono>
                 {r.contributed > 0 && (
-                  <Mono className="block text-2xs tabular-nums text-emerald-600 dark:text-emerald-400">
+                  <Mono className="block text-2xs tabular-nums text-success">
                     +{(((r.owed - r.contributed) / r.contributed) * 100).toFixed(2)}%
                   </Mono>
                 )}

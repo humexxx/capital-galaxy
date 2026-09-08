@@ -204,14 +204,14 @@ function PointTooltip(props: {
           swatch={lineColor}
           label="Net worth"
           value={formatMoneyFull(row.rawValue)}
-          valueClass={row.rawValue < 0 ? "text-rose-600" : "text-emerald-600"}
+          valueClass={row.rawValue < 0 ? "text-destructive" : "text-success"}
         />
         {debt > 0 && (
           <TooltipRow
             swatch="#f43f5e"
             label="Debt"
             value={formatMoneyFull(debt)}
-            valueClass="text-rose-600"
+            valueClass="text-destructive"
           />
         )}
         {investments > 0 && (
@@ -219,7 +219,7 @@ function PointTooltip(props: {
             swatch="#10b981"
             label="Investments"
             value={formatMoneyFull(investments)}
-            valueClass="text-emerald-600"
+            valueClass="text-success"
           />
         )}
         {portfolio != null && portfolio > 0 && (
@@ -234,7 +234,7 @@ function PointTooltip(props: {
             swatch="var(--muted-foreground)"
             label={ghostLabel ?? "Base plan"}
             value={`${formatMoneyFull(ghost)} (${delta >= 0 ? "+" : "−"}${formatMoneyFull(Math.abs(delta))})`}
-            valueClass={delta >= 0 ? "text-emerald-600" : "text-rose-600"}
+            valueClass={delta >= 0 ? "text-success" : "text-destructive"}
           />
         )}
       </div>
@@ -681,7 +681,7 @@ function ComparePlansTooltip(props: {
               swatch={proj.plan.color}
               label={proj.plan.name}
               value={formatMoneyFull(Number(value))}
-              valueClass={Number(value) < 0 ? "text-rose-600" : undefined}
+              valueClass={Number(value) < 0 ? "text-destructive" : undefined}
             />
           );
         })}

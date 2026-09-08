@@ -23,7 +23,7 @@ export function LandingSplit() {
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           <div className="rounded-xl border bg-card p-8 lg:col-span-2">
             <Eyebrow as="div" className="mb-4 inline-flex items-center gap-2">
-              <Zap className="h-3 w-3 text-emerald-500 dark:text-emerald-400" />
+              <Zap className="h-3 w-3 text-success" />
               Compare
             </Eyebrow>
             <Heading level="h3">
@@ -74,7 +74,7 @@ export function LandingSplit() {
               number.
             </Text>
             <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+              <ShieldCheck className="h-4 w-4 text-success" />
               Row-level ownership, enforced server-side
             </div>
           </div>

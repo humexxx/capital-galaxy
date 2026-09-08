@@ -982,8 +982,8 @@ function ScenarioDeltaCard({
           <Mono
             className={`text-sm font-semibold ${
               netWorthDelta >= 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400"
+                ? "text-success"
+                : "text-destructive"
             }`}
           >
             {netWorthDelta >= 0 ? "+" : "−"}
@@ -996,8 +996,8 @@ function ScenarioDeltaCard({
             <Mono
               className={`text-sm font-semibold ${
                 debtFreeDelta <= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
+                  ? "text-success"
+                  : "text-destructive"
               }`}
             >
               {debtFreeDelta === 0
@@ -1680,8 +1680,8 @@ function ProjectionPanel({
             as="p"
             className={`text-xl font-bold sm:text-2xl ${
               today >= 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400"
+                ? "text-success"
+                : "text-destructive"
             }`}
           >
             {formatCurrency(today)}
@@ -1696,8 +1696,8 @@ function ProjectionPanel({
               as="p"
               className={`text-sm font-semibold ${
                 next >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
+                  ? "text-success"
+                  : "text-destructive"
               }`}
             >
               {formatCurrency(next)}
@@ -1712,8 +1712,8 @@ function ProjectionPanel({
             as="p"
             className={`text-sm font-semibold ${
               future >= 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400"
+                ? "text-success"
+                : "text-destructive"
             }`}
           >
             {formatCurrency(future)}
@@ -1724,8 +1724,8 @@ function ProjectionPanel({
               as="p"
               className={`text-2xs ${
                 endDelta >= 0
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
+                  ? "text-success"
+                  : "text-destructive"
               }`}
             >
               {endDelta >= 0 ? "+" : "−"}
@@ -1948,7 +1948,7 @@ function StrategyPicker({
               </span>
               {isCheapest && (
                 <Zap
-                  className="size-3 shrink-0 text-amber-500"
+                  className="size-3 shrink-0 text-warning"
                   aria-label="Cheapest"
                 />
               )}
@@ -1963,7 +1963,7 @@ function StrategyPicker({
                 className={cn(
                   "text-2xs tabular-nums",
                   isCheapest
-                    ? "text-emerald-700 dark:text-emerald-300"
+                    ? "text-success"
                     : "text-muted-foreground"
                 )}
               >
@@ -2005,9 +2005,9 @@ function StatRow({
   const animatedValue = useAnimatedNumber(value);
   const colorClass =
     tone === "positive"
-      ? "text-emerald-600 dark:text-emerald-400"
+      ? "text-success"
       : tone === "negative"
-      ? "text-rose-600 dark:text-rose-400"
+      ? "text-destructive"
       : "";
 
   const inner = (
@@ -2171,7 +2171,7 @@ function SurplusBreakdown({
         <span>= Surplus</span>
         <Mono
           className={
-            surplus >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+            surplus >= 0 ? "text-success" : "text-destructive"
           }
         >
           {formatCurrency(surplus)}
