@@ -13,6 +13,10 @@
 }
 
 @theme inline {
+  /* iOS motion: a little longer than the web default and on the UIKit
+     ease-in-out curve, so every transition-* utility settles the same way. */
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -246,6 +250,12 @@ body {
 
   ::selection {
     @apply bg-primary/20;
+  }
+
+  /* Overlay-thin scrollbars, like a native scroll view. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent) transparent;
   }
 
   /* Horizontal overscroll is never wanted: it chains into the browser's

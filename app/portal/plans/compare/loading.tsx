@@ -30,7 +30,7 @@ export default function ComparePlansLoading() {
       <div className="space-y-4 rounded-xl border bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Skeleton className="h-5 w-44" />
-          <Skeleton className="h-9 w-56 rounded-lg" />
+          <Skeleton className="h-10 w-56 rounded-lg" />
         </div>
         <Skeleton className="h-80 w-full" />
       </div>

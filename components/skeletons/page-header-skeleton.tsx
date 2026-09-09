@@ -26,7 +26,7 @@ export function PageHeaderSkeleton({
       {actions > 0 && (
         <div className="flex shrink-0 items-center gap-2">
           {Array.from({ length: actions }).map((_, i) => (
-            <Skeleton key={i} className="h-9 w-28" />
+            <Skeleton key={i} className="h-10 w-28" />
           ))}
         </div>
       )}

@@ -16,7 +16,7 @@ function FieldPair() {
   return (
     <div className="space-y-2">
       <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-9 w-full" />
+      <Skeleton className="h-10 w-full" />
     </div>
   )
 }
@@ -72,8 +72,8 @@ export default function NewPlanLoading() {
       </FormCard>
 
       <div className="flex justify-end gap-2">
-        <Skeleton className="h-9 w-24" />
-        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-28" />
       </div>
     </section>
   )

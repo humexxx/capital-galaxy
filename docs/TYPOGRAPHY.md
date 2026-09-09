@@ -67,15 +67,16 @@ feel oversized. **Tailwind class** is the exact string in `headingVariants`.
 | Level     | Size (mobile → desktop) | Tailwind class                                  | Weight | Default tag | Use it for                          |
 | --------- | ----------------------- | ----------------------------------------------- | ------ | ----------- | ----------------------------------- |
 | `display` | 36 → 48 → 60 px         | `text-4xl sm:text-5xl lg:text-6xl`              | 700    | `h1`        | Landing hero only                   |
-| `h1`      | 30 → 36 px              | `text-3xl sm:text-4xl`                          | 600    | `h1`        | Page titles                         |
+| `h1`      | 30 → 36 px              | `text-3xl sm:text-4xl`                          | 700    | `h1`        | Page titles (iOS large-title weight) |
 | `h2`      | 24 → 30 px              | `text-2xl sm:text-3xl`                          | 500    | `h2`        | Major section headings              |
 | `h3`      | 20 → 24 px              | `text-xl sm:text-2xl`                           | 500    | `h3`        | Subsection headings, plan titles    |
 | `h4`      | 18 → 20 px              | `text-lg sm:text-xl`                            | 500    | `h4`        | Card titles                         |
 | `h5`      | 16 → 18 px              | `text-base sm:text-lg`                          | 500    | `h5`        | Small card titles, dialog titles    |
 | `h6`      | 14 → 16 px              | `text-sm sm:text-base`                          | 500    | `h6`        | List-item headings, table captions  |
 
-Weights track the shadcn docs scale (hero `font-bold`, page title `font-semibold`,
-sub-levels `font-medium`) — deliberately lighter than a typical bold heading ramp.
+Weights: hero and page title `font-bold` (the iOS large-title weight),
+sub-levels `font-medium` — deliberately lighter than a typical bold heading ramp
+below the title.
 
 All levels carry `tracking-tight`. When you need a number/stat to read like a
 heading (KPI hero values), don't use `<Heading>` — apply the same mobile-first

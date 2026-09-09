@@ -18,7 +18,7 @@ export default function PortfolioLoading() {
         <PageHeaderSkeleton actions={2} descriptionWidth="w-80" />
 
         {/* Tab strip */}
-        <Skeleton className="h-9 w-72 rounded-lg" />
+        <Skeleton className="h-10 w-72 rounded-lg" />
 
         {/* Four KPI cards — the headline row */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

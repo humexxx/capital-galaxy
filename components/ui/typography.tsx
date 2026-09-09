@@ -22,7 +22,7 @@ const headingVariants = cva("text-foreground text-balance", {
       // hero is bold, the page title semibold, every sub-level medium. Keep in
       // sync with the weight column in docs/TYPOGRAPHY.md.
       display: "text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl",
-      h1: "text-3xl font-semibold tracking-tight sm:text-4xl",
+      h1: "text-3xl font-bold tracking-tight sm:text-4xl",
       h2: "text-2xl font-medium tracking-tight sm:text-3xl",
       h3: "text-xl font-medium tracking-tight sm:text-2xl",
       h4: "text-lg font-medium tracking-tight sm:text-xl",

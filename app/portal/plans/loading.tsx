@@ -24,7 +24,7 @@ export default function PlansLoading() {
             <div className="flex flex-wrap items-center gap-2">
               {/* horizon select + metric tabs */}
               <Skeleton className="h-8 w-38" />
-              <Skeleton className="h-9 w-52" />
+              <Skeleton className="h-10 w-52" />
             </div>
           </div>
           <div className="px-3 pb-6 sm:px-6">

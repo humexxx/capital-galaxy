@@ -157,6 +157,12 @@ computed height, not a spacing step.
   those, not `bg-background` — inside a card `bg-background` paints grey.
 - **Press feedback.** `Button` dims and shrinks a touch on `:active`; do not add
   a second hover-only affordance on top of it.
+- **Control height is 40px** (`h-10`) for `Button`, `Input`, `SelectTrigger`
+  and `InputGroup` alike, so a field and the button beside it line up. `sm`
+  (32px) is for toolbars and table rows. Skeletons for a form row are `h-10`.
+- **Dialogs are sheets on a phone.** Below `sm`, `DialogContent` pins to the
+  bottom edge with a grabber and slides up; from `sm` it is the centred card.
+  Nothing to opt into — but do not fight it with `top-*` overrides.
 - **System colours.** `--primary` is system blue, `--destructive` system red,
   `--success` system green (the on-state of `Switch`), `--warning` system
   orange. Status text and tints use these tokens (`text-success`,
