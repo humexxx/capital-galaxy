@@ -167,7 +167,9 @@ computed height, not a spacing step.
   `--success` system green (the on-state of `Switch`), `--warning` system
   orange. Status text and tints use these tokens (`text-success`,
   `bg-destructive/10`, `border-warning/40`), never raw `emerald-*` / `rose-*` /
-  `amber-*` steps — the tokens already carry their dark-mode value. The chart
+  `amber-*` steps — the tokens already carry their dark-mode value. The light
+  steps sit deeper than Apple's swatches on purpose: they are read as small
+  text on white far more than as fills, and systemGreen itself is 2.3:1 there. The chart
   palette is separate and validated; it does not follow these.
 
 ## Adding a new step

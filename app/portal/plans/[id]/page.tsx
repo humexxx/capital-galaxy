@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import type { Projection } from "@/types/finance";
+import type { FinancePlanWithLines, Projection } from "@/types/finance";
 
 import { PlanEditor } from "@/components/finance/plan-editor";
 import { getPortfolioPerformanceData } from "@/lib/services/chart-service";
@@ -76,7 +76,12 @@ export default async function PlanDetailPage({ params }: PageProps) {
   // Scenario plans overlay their base plan's projection as a ghost line so the
   // delta is visible directly on the chart. Calibrated the same way as the
   // scenario itself; null when the plan is standalone or the base was deleted.
-  let ghost: { name: string; color: string; projection: Projection } | null = null;
+  let ghost: {
+    name: string;
+    color: string;
+    plan: FinancePlanWithLines;
+    projection: Projection;
+  } | null = null;
   if (plan.basedOnPlanId) {
     const basePlan = await getPlanWithLines(plan.basedOnPlanId, ctx.effectiveUserId);
     if (basePlan) {
@@ -84,6 +89,9 @@ export default async function PlanDetailPage({ params }: PageProps) {
       ghost = {
         name: basePlan.name,
         color: basePlan.color,
+        // The calibrated lines travel with the projection so the chart can
+        // resolve the base plan's day-aware "today" the same way it does its own.
+        plan: baseBaseline,
         projection: await projectPlanWithPortfolio(baseBaseline, ctx.effectiveUserId),
       };
     }

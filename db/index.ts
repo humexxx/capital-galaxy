@@ -1,5 +1,3 @@
-import "server-only";
-
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -7,7 +5,16 @@ import { env } from "@/lib/env";
 
 import * as schema from "./schema";
 
-const connectionString = env.DATABASE_URL;
+// No `server-only` marker here on purpose: `db/seed.ts` and other tsx scripts
+// import this module outside Next, where the marker package does not resolve.
+// The services that wrap it carry the marker, which is where a client import
+// would come from anyway.
+
+// Only unset under SKIP_ENV_VALIDATION (a build that never queries). postgres-js
+// parses the URL when the client is constructed, so it needs a well-formed one
+// even then; a real request without DATABASE_URL still fails on first query.
+const connectionString =
+  env.DATABASE_URL ?? "postgresql://unset:unset@localhost:5432/postgres";
 const url = connectionString.includes("?")
   ? `${connectionString}&sslmode=require`
   : `${connectionString}?sslmode=require`;

@@ -105,13 +105,17 @@
   --accent: oklch(0.945 0.005 286);
   --accent-foreground: oklch(0.205 0 0);
 
-  --destructive: oklch(0.63 0.235 29);  /* #FF3B30 systemRed */
+  /* The three status hues are used as TEXT far more than as fills, so the light
+     steps sit deeper than Apple's swatches: systemGreen #34C759 is 2.3:1 on
+     white, these clear ~4.4–4.8:1. Dark mode keeps the bright system values,
+     where they measure 7:1 on the card. */
+  --destructive: oklch(0.58 0.22 27);   /* systemRed, text-safe */
   --destructive-foreground: oklch(0.985 0 0);
 
-  --success: oklch(0.72 0.19 150);      /* #34C759 systemGreen */
+  --success: oklch(0.55 0.17 152);      /* systemGreen, text-safe */
   --success-foreground: oklch(1 0 0);
 
-  --warning: oklch(0.75 0.17 62);       /* #FF9500 systemOrange */
+  --warning: oklch(0.58 0.16 58);       /* systemOrange, text-safe */
   --warning-foreground: oklch(0.2 0 0);
 
   --border: oklch(0.9 0.005 286);

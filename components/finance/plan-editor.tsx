@@ -178,6 +178,8 @@ function useAnimatedNumber(target: number, duration = 350): number {
 type GhostPlan = {
   name: string;
   color: string;
+  /** The base plan's calibrated lines — lets today's ghost point be day-aware. */
+  plan?: FinancePlanWithLines;
   projection: Projection;
 };
 
@@ -1547,13 +1549,18 @@ function ProjectionPanel({
   // (matched by accounting period — the base can have a different startMonth).
   // Hidden via the "vs base" chip without losing the alignment work.
   const [showGhost, setShowGhost] = useState(true);
-  const ghostValues = useMemo<(number | null)[] | undefined>(
-    () =>
-      ghost && showGhost
-        ? mapGhostValues(chartSeries.points, ghost.projection, anchorDay)
-        : undefined,
-    [ghost, showGhost, chartSeries.points, anchorDay]
-  );
+  const ghostValues = useMemo<(number | null)[] | undefined>(() => {
+    if (!ghost || !showGhost) return undefined;
+    const values = mapGhostValues(chartSeries.points, ghost.projection, anchorDay);
+    // The main series' today point is the day-aware snapshot (see
+    // `alignTodayPoint`); the ghost has to be read the same way or the two
+    // plans show a spurious delta at today equal to the flows still to come.
+    if (ghost.plan && values[chartSeries.pastCount] != null) {
+      const snap = computeTodaySnapshot(ghost.plan, ghost.projection, anchorDay);
+      if (snap) values[chartSeries.pastCount] = snap.netWorth;
+    }
+    return values;
+  }, [ghost, showGhost, chartSeries.points, chartSeries.pastCount, anchorDay]);
 
   // Portfolio series: recorded snapshots for the past, the projection's
   // (growing) portfolioValue for the future. Only when the plan includes it.

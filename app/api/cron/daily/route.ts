@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { isCronAuthorized } from "@/lib/cron-auth";
 import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -8,22 +8,6 @@ import { createDailySnapshots } from "@/lib/services/snapshot-service";
 import { createDailyFinanceSnapshots } from "@/lib/services/finance-snapshot-service";
 import { createAutomatedTasksForAllRoadPaths } from "@/lib/services/task-automation-service";
 import { refreshF1News } from "@/lib/services/rapidapi-f1-news-service";
-
-/**
- * Read at request time, not module load: a module-scope throw made every
- * `next build` without the secret fail while collecting page data, and an
- * unset secret should refuse requests, not builds. Fail closed either way.
- */
-function isAuthorized(authHeader: string | null): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const expected = `Bearer ${secret}`;
-  // Length check first: timingSafeEqual throws on a length mismatch.
-  if (!authHeader || authHeader.length !== expected.length) {
-    return false;
-  }
-  return timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
-}
 
 async function updateAppState(key: string, value: string, error: string | null = null) {
   const existingState = await db.query.appState.findFirst({
@@ -174,7 +158,7 @@ async function processF1News(today: Date) {
 
 export async function GET(request: NextRequest) {
   try {
-    if (!isAuthorized(request.headers.get("authorization"))) {
+    if (!isCronAuthorized(request.headers.get("authorization"))) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

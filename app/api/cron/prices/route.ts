@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { isCronAuthorized } from "@/lib/cron-auth";
 
 import { refreshPrices } from "@/lib/services/price-service";
 import { backfillAllOwners } from "@/lib/services/allocation-service";
@@ -21,24 +21,8 @@ import { backfillAllOwners } from "@/lib/services/allocation-service";
 // with many individually-quoted tickers is slow rather than heavy.
 export const maxDuration = 60;
 
-/**
- * Read at request time, not module load: a module-scope throw made every
- * `next build` without the secret fail while collecting page data, and an
- * unset secret should refuse requests, not builds. Fail closed either way.
- */
-function isAuthorized(authHeader: string | null): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const expected = `Bearer ${secret}`;
-  // Length check first: timingSafeEqual throws on a length mismatch.
-  if (!authHeader || authHeader.length !== expected.length) {
-    return false;
-  }
-  return timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
-}
-
 export async function GET(request: NextRequest) {
-  if (!isAuthorized(request.headers.get("authorization"))) {
+  if (!isCronAuthorized(request.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

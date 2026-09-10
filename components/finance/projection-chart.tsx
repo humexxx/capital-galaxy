@@ -721,6 +721,9 @@ export function ComparePlansChart({
   // on each focus change and metric switch, so it is computed once per input.
   // The single-plan chart above does the same for its series.
   const { seriesByPlan, boundary, data, compareConfig, yAxisWidth } = useMemo(() => {
+    if (projections.length === 0) {
+      return { seriesByPlan: [], boundary: -1, data: [], compareConfig: {}, yAxisWidth: 32 };
+    }
     // Map each plan to a stable, CSS-safe series key (series0, series1, …) to avoid
     // building CSS custom properties from raw UUIDs.
     const seriesByPlan = projections.map((proj, i) => ({
