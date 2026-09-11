@@ -1,5 +1,6 @@
 "use client";
 
+import { debtFreeMonthsFromNow } from "@/lib/finance/chart-series";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 
@@ -39,6 +40,22 @@ export function CompareView({
   const [selected, setSelected] = useState<Set<string>>(
     new Set(projections.map((p) => p.plan.id))
   );
+  // A plan cloned or created after mount arrives through router.refresh(),
+  // which reconciles rather than remounts — so it has to be added to the
+  // selection here or the copy shows up unchecked, with no line on the chart.
+  const [knownIds, setKnownIds] = useState<string[]>(() => projections.map((p) => p.plan.id));
+  const currentIds = projections.map((p) => p.plan.id);
+  if (
+    currentIds.length !== knownIds.length ||
+    currentIds.some((id, i) => id !== knownIds[i])
+  ) {
+    const known = new Set(knownIds);
+    const added = currentIds.filter((id) => !known.has(id));
+    setKnownIds(currentIds);
+    if (added.length > 0) {
+      setSelected((prev) => new Set([...prev, ...added]));
+    }
+  }
   const [metric, setMetric] = useState<Metric>("netWorth");
 
   const filtered = useMemo(
@@ -121,8 +138,12 @@ export function CompareView({
               >
                 <div className="flex items-center justify-between">
                   <Heading level="h6" as="p">{p.plan.name}</Heading>
-                  {p.monthsToDebtFree !== null && (
-                    <Badge variant="outline">Debt-free in {p.monthsToDebtFree} mo</Badge>
+                  {debtFreeMonthsFromNow(p) !== null && (
+                    <Badge variant="outline">
+                      {debtFreeMonthsFromNow(p) === 0
+                        ? "Debt-free"
+                        : `Debt-free in ${debtFreeMonthsFromNow(p)} mo`}
+                    </Badge>
                   )}
                 </div>
                 <dl className="mt-3 space-y-1 text-sm">

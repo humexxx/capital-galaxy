@@ -38,15 +38,15 @@ export function MonthPicker() {
       return
     }
 
-    const newDate = new Date(date)
-    newDate.setMonth(monthIndex)
+    // From parts: `setMonth` on the 31st rolled into the month after the one
+    // that was clicked.
+    const newDate = new Date(date.getFullYear(), monthIndex, 1)
     setDate(newDate)
     updateUrl(newDate.getMonth(), newDate.getFullYear())
   }
 
   const changeYear = (offset: number) => {
-    const newDate = new Date(date)
-    newDate.setFullYear(date.getFullYear() + offset)
+    const newDate = new Date(date.getFullYear() + offset, date.getMonth(), 1)
     
     // If future year, reset to current year (or handle differently based on req)
     // Requirement says "no select month in future", implying we shouldn't even go to future years usually, 

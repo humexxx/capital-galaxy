@@ -64,7 +64,9 @@ describe("saveConfirmationAction", () => {
       }),
     );
     expect(revalidatePath).toHaveBeenCalledWith(`/portal/plans/${PLAN_ID}`);
-    expect(revalidatePath).toHaveBeenCalledTimes(1);
+    // The dashboard hosts the prompt and the calibrated card.
+    expect(revalidatePath).toHaveBeenCalledWith("/portal");
+    expect(revalidatePath).toHaveBeenCalledTimes(2);
   });
 
   it("accepts null notes and an empty debtBalances array", async () => {

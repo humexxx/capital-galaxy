@@ -67,7 +67,12 @@ export function MoneyInput({
           // Keep digits and a single dot. Typing a comma or a stray symbol is
           // a slip, not an instruction, and rejecting the whole keystroke
           // makes the field feel broken.
-          const cleaned = e.target.value.replace(/[^\d.]/g, "").replace(/(\..*)\./g, "$1");
+          // Everything after the first dot is the fraction, capped at two
+          // digits. The old regex dropped only one extra dot per pass and
+          // concatenated the rest ("1.2.3" → 1.23, a 10× slip on paste).
+          const raw = e.target.value.replace(/[^\d.]/g, "");
+          const [head, ...rest] = raw.split(".");
+          const cleaned = rest.length > 0 ? `${head}.${rest.join("").slice(0, 2)}` : head;
           onChange(cleaned);
         }}
         className={cn(

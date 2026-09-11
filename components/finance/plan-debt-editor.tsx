@@ -42,6 +42,7 @@ type DebtInput = {
   // B1/B2 — pass through. The inline debt editor doesn't expose these yet;
   // they survive round-trips via the parent that supplies them.
   recurrenceType: RecurrenceType;
+  dayOfMonth: number | null;
   weekOfMonth: number | null;
   dayOfWeek: number | null;
   intervalMonths: number | null;
@@ -64,6 +65,7 @@ const EMPTY_DRAFT: DebtInput = {
   minPaymentPercent: "",
   minPaymentFloor: "",
   recurrenceType: "monthly_day",
+  dayOfMonth: null,
   weekOfMonth: null,
   dayOfWeek: null,
   intervalMonths: null,
@@ -87,6 +89,7 @@ export function PlanDebtEditor({ debts, onAdd, onUpdate, onDelete }: PlanDebtEdi
           minPaymentPercent: draft.minPaymentPercent || "0",
           minPaymentFloor: draft.minPaymentFloor || "0",
           recurrenceType: draft.recurrenceType,
+          dayOfMonth: draft.dayOfMonth,
           weekOfMonth: draft.weekOfMonth,
           dayOfWeek: draft.dayOfWeek,
           intervalMonths: draft.intervalMonths,
@@ -256,7 +259,10 @@ function DebtRow({
       minPaymentFloor: overrides.minPaymentFloor ?? (minFloor.trim() || "0"),
       // Preserve the recurrence-model fields the row was loaded with — this
       // editor doesn't surface them, but inline edits should not blow them
-      // away. dayOfMonth stays nullable for legacy rows.
+      // away. The service writes `dayOfMonth ?? null`, so leaving it out of
+      // the payload reset every payment day to the 1st on a blur.
+      dayOfMonth:
+        overrides.dayOfMonth !== undefined ? overrides.dayOfMonth : debt.dayOfMonth,
       recurrenceType:
         overrides.recurrenceType ?? (debt.recurrenceType as RecurrenceType),
       weekOfMonth:

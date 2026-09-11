@@ -35,17 +35,18 @@ export async function createPortfolio(userId: string, name?: string): Promise<Po
 export const getPortfolioStats = cache(async function getPortfolioStats(
   portfolioId: string
 ): Promise<PortfolioStats> {
-  // Get all approved buy transactions to calculate currentValue (totalValue) and initialValue (costBasis)
-  const buyTransactions = await db
+  // Every approved row: buys carry the holding and the cost basis, withdrawals
+  // the money already taken out.
+  const approvedTransactions = await db
     .select()
     .from(transactions)
     .where(
-      and(
-        eq(transactions.portfolioId, portfolioId),
-        eq(transactions.status, "approved"),
-        eq(transactions.type, "buy")
-      )
+      and(eq(transactions.portfolioId, portfolioId), eq(transactions.status, "approved"))
     );
+  const buyTransactions = approvedTransactions.filter((t) => t.type === "buy");
+  const totalWithdrawn = approvedTransactions
+    .filter((t) => t.type === "withdrawal")
+    .reduce((sum, t) => sum + parseFloat(t.total || "0"), 0);
 
   // Calculate totalValue (sum of currentValue)
   const totalValue = buyTransactions.reduce(
@@ -59,7 +60,9 @@ export const getPortfolioStats = cache(async function getPortfolioStats(
     0
   );
 
-  const allTimeProfit = totalValue - costBasis;
+  // A withdrawal lowers the holding but not what was put in; without adding
+  // it back a buy that grew and was partly cashed out read as a loss.
+  const allTimeProfit = totalValue + totalWithdrawn - costBasis;
   const allTimeProfitPercentage = costBasis > 0 ? (allTimeProfit / costBasis) * 100 : 0;
 
   // Get unique investment methods count
@@ -75,6 +78,7 @@ export const getPortfolioStats = cache(async function getPortfolioStats(
   return {
     totalValue,
     costBasis,
+    totalWithdrawn,
     allTimeProfit,
     allTimeProfitPercentage,
     totalInvestmentMethods: uniqueInvestmentMethods,
@@ -176,7 +180,7 @@ export const getPortfolioAssets = cache(async function getPortfolioAssets(
 
   // Calculate profit/loss for each asset
   const assets = Object.values(groupedAssets).map((asset) => {
-    const profitLoss = asset.holdingAmount - asset.totalInvested;
+      const profitLoss = asset.holdingAmount + asset.totalWithdrawn - asset.totalInvested;
     const profitLossPercentage = asset.totalInvested > 0 
       ? (profitLoss / asset.totalInvested) * 100 
       : 0;
@@ -422,6 +426,7 @@ export type InvestorTransaction = {
   id: string;
   date: Date;
   methodName: string;
+  investorId: string;
   investorName: string;
   investorEmail: string | null;
   type: TransactionType;
@@ -448,6 +453,7 @@ export async function getInvestorTransactions(
       id: transactions.id,
       date: transactions.date,
       methodName: investmentMethods.name,
+      investorId: users.id,
       investorName: users.fullName,
       investorEmail: users.email,
       type: transactions.type,

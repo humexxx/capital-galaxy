@@ -28,6 +28,15 @@ import { SportShell } from "../shared/sport-shell";
 import { StatusPill } from "../shared/status-pill";
 import { SportsTh } from "../shared/table-primitives";
 
+/**
+ * A `YYYY-MM-DD` read as a calendar day. `new Date("2026-03-08")` is UTC
+ * midnight, which anybody west of Greenwich renders as the 7th.
+ */
+function dateOnly(iso: string): Date {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d) : new Date(iso);
+}
+
 type TourTab = { value: string; label: string; data: RacquetData };
 
 type RacquetViewProps = {
@@ -278,8 +287,8 @@ function TournamentsList({ data }: { data: RacquetData }) {
 }
 
 function formatRange(start: string, end: string): string {
-  const s = new Date(start);
-  const e = new Date(end);
+  const s = dateOnly(start);
+  const e = dateOnly(end);
   const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
   if (sameMonth) {

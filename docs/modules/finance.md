@@ -1,7 +1,7 @@
 # Finance
 
 > **Status:** Active
-> **Last reviewed:** 2026-09-03
+> **Last reviewed:** 2026-09-11
 
 ## Overview
 Personal financial planning: users build *plans* (scenarios) with incomes,
@@ -99,6 +99,7 @@ gated on the `showContextAvatar` preference — see [Settings](./settings.md).
 
 ## Notes
 - Conventional Commits scope: `finance`
+- **Logic audit (2026-09-11).** The plan page's confirmation dialog pre-fills the period OPENING (previous close / calibrated initials), is mounted only while open, and `confirmedSavings` accepts a negative figure (deficits are carried; the DB check was dropped in migration 0051). The anchored calendar converts `periodRangeFor`'s UTC bounds to local days, opens on today's period, reads the `every_n_months` anchor in UTC, and a "Move all" drop turns the line into a `monthly_day` rule. `computeTodaySnapshot` honours skip/amount overrides; `compareDebtStrategies` on the plan page gets the same overrides as the chart; `ComparePlansChart` uses the plans' anchor day and plots `null` past a shorter plan's end; `ProjectionTable` starts at the forecast window's `startIndex`; period-0 snapshots include the portfolio and snapshots grow it at the weighted ROI; `monthsToDebtFree` is null for a plan whose debts all start at 0, and every "debt-free in N mo" label is `debtFreeMonthsFromNow` (counted from today). Confirming, creating and deleting plans revalidate `/portal`.
 - Cron job `/api/cron/daily` may write snapshots into this module — keep in sync with [Portfolio](./portfolio.md).
 - All actions wrap their handler in `safe()` from `@/lib/actions/safe` so service errors translate to `{ success: false, error: "Action failed" }` for the client.
 - `getPlanWithLines`, `listUserPlans`, `getMainPlan`, `getPortfolioValueForUser` and `getPortfolioWeightedMonthlyRoi` are wrapped in `React.cache()` so the dashboard cards, the plans layout and every projection on a plans page share one DB hit per request.

@@ -19,6 +19,15 @@ import { SportShell } from "../shared/sport-shell";
 import { StatusPill } from "../shared/status-pill";
 import { SportsTh } from "../shared/table-primitives";
 
+/**
+ * A `YYYY-MM-DD` read as a calendar day. `new Date("2026-03-08")` is UTC
+ * midnight, which anybody west of Greenwich renders as the 7th.
+ */
+function dateOnly(iso: string): Date {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d) : new Date(iso);
+}
+
 type F1ViewProps = {
   data: F1Data;
   /** Stored F1 news, newest first. Empty hides the tab. */
@@ -175,7 +184,7 @@ export function F1View({ data, news = [] }: F1ViewProps) {
                     {race.circuit} · {race.location}
                   </Text>
                   <Mono className="block text-xs text-muted-foreground">
-                    {new Date(race.date).toLocaleDateString(undefined, {
+                    {dateOnly(race.date).toLocaleDateString(undefined, {
                       weekday: "short",
                       month: "short",
                       day: "numeric",

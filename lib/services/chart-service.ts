@@ -76,19 +76,10 @@ export async function getPortfolioPerformanceData(
   }));
 
   if (chartData.length > 0) {
-    // If there are snapshots, add dummy point at day 1 of the first snapshot's month
-    // If the first snapshot is on day 1, use day 1 of the previous month
-    const firstSnapshotDate = new Date(chartData[0].date);
-    const isFirstDayOfMonth = getDate(firstSnapshotDate) === 1;
-    const dummyStartDate = isFirstDayOfMonth
-      ? startOfMonth(subMonths(firstSnapshotDate, 1))
-      : startOfMonth(firstSnapshotDate);
-    
-    // Insert the dummy point at the beginning with value 0
-    chartData.unshift({
-      date: dummyStartDate.toISOString(),
-      value: 0,
-    });
+    // No synthetic $0 point in front of real history: the chart's headline
+    // change is measured from the first point, so a fabricated zero made
+    // every portfolio read "+0.0%" and fabricated an origin the money never
+    // had. The series starts where the records start.
 
     // Check if the last snapshot is not from today
     const lastSnapshot = chartData[chartData.length - 1];

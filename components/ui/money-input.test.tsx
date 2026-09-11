@@ -37,3 +37,15 @@ describe("MoneyInput", () => {
     expect(onChange).toHaveBeenCalledWith("19.00");
   });
 });
+
+describe("MoneyInput — pasted values", () => {
+  it("keeps only the first dot and two decimals on paste", () => {
+    const onChange = vi.fn();
+    render(<MoneyInput id="p" value="" onChange={onChange} currency="USD" />);
+
+    // The old sanitiser dropped one dot per pass and concatenated the rest:
+    // "1.2.3" became 1.23, a tenfold slip.
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "1.2.3.4" } });
+    expect(onChange).toHaveBeenCalledWith("1.23");
+  });
+});

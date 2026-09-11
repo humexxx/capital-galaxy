@@ -75,6 +75,8 @@ export async function createPlanAction(input: CreateFinancePlanInput) {
       after: plan,
     });
     revalidatePath(PLAN_PATH);
+    // The dashboard card follows the main plan, which both of these can change.
+    revalidatePath("/portal");
     return { success: true as const, data: plan };
   });
 }
@@ -111,6 +113,8 @@ export async function deletePlanAction(planId: string) {
       entityId: parsed.data,
     });
     revalidatePath(PLAN_PATH);
+    // The dashboard card follows the main plan, which both of these can change.
+    revalidatePath("/portal");
     return { success: true as const };
   });
 }

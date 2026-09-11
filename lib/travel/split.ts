@@ -67,7 +67,10 @@ export function defaultShares(members: SplitMember[]): Map<string, number> {
   const rest = members.filter((m) => m.sharePercent === null);
   const claimed = fixed.reduce((sum, m) => sum + (m.sharePercent ?? 0), 0);
 
-  for (const m of fixed) shares.set(m.id, (m.sharePercent ?? 0) / 100);
+  // Everybody fixed and the total short of 100: scale up so the whole trip is
+  // still charged to somebody. 30/30 used to leave 40% owed by nobody.
+  const scale = rest.length === 0 && claimed > 0 && claimed < 100 ? 100 / claimed : 1;
+  for (const m of fixed) shares.set(m.id, ((m.sharePercent ?? 0) * scale) / 100);
 
   if (rest.length > 0) {
     // Never negative: if the fixed shares already exceed 100 the remainder is
@@ -129,7 +132,15 @@ export function splitTrip(items: SplitItem[], members: SplitMember[]): MemberSha
       const low = cost.unitLow ?? 0;
       const high = cost.unitHigh !== null && cost.unitHigh > low ? cost.unitHigh : low;
       const targets = payers.length > 0 ? payers : members.map((m) => m.id);
-      for (const id of targets) charge(id, item, low, high);
+      // Named payers covering more seats than their own: the item is priced
+      // per attendee, so the payers split the attendees' total between them
+      // or the other seats' fares vanish from every bill.
+      const attendees = (item.attendeeIds ?? []).filter((id) => byMember.has(id));
+      const factor =
+        attendees.length > 0 && item.payerIds.length > 0 && payers.length > 0 && payers.length < attendees.length
+          ? attendees.length / payers.length
+          : 1;
+      for (const id of targets) charge(id, item, low * factor, high * factor);
       continue;
     }
 

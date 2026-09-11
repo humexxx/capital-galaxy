@@ -194,6 +194,7 @@ describe("getPortfolioStats", () => {
     expect(stats).toEqual({
       totalValue: 0,
       costBasis: 0,
+      totalWithdrawn: 0,
       allTimeProfit: 0,
       allTimeProfitPercentage: 0,
       totalInvestmentMethods: 0,

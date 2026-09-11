@@ -3,8 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildChartSeries,
   computeProjectionWindow,
-  type PlanHistoryPoint,
-} from "./chart-series";
+  type PlanHistoryPoint, debtFreeMonthsFromNow } from "./chart-series";
 import type { Projection, ProjectionMonth } from "@/types/finance";
 
 function utc(year: number, monthZeroIdx: number, day: number): Date {
@@ -240,5 +239,33 @@ describe("buildChartSeries", () => {
     // No snapshot strictly before Jun → fallback window.
     expect(pastCount).toBe(1);
     expect(points.map((p) => p.netWorth)).toEqual([3, 4, 5]);
+  });
+});
+
+describe("debtFreeMonthsFromNow", () => {
+  function withPlan(proj: Projection, monthsToDebtFree: number | null, anchorDay = 1): Projection {
+    return {
+      ...proj,
+      monthsToDebtFree,
+      plan: { confirmationDayOfMonth: anchorDay },
+    } as unknown as Projection;
+  }
+
+  it("counts from today, not from the plan's first period", () => {
+    const proj = withPlan(
+      projectionOf(
+        Array.from({ length: 36 }, (_, i) => ({ date: utc(2024, i, 1), netWorth: i }))
+      ),
+      30
+    );
+    // Plan started Jan 2024, debt cleared at period 30 (Jul 2026); on 11 Sep
+    // 2026 that is already behind us — the old label still said "30 mo".
+    expect(debtFreeMonthsFromNow(proj, utc(2026, 8, 11))).toBe(0);
+    expect(debtFreeMonthsFromNow(proj, utc(2026, 3, 11))).toBe(3);
+  });
+
+  it("passes null through and tolerates an empty projection", () => {
+    expect(debtFreeMonthsFromNow(withPlan(projectionOf([]), null), utc(2026, 0, 1))).toBeNull();
+    expect(debtFreeMonthsFromNow(withPlan(projectionOf([]), 4), utc(2026, 0, 1))).toBe(4);
   });
 });

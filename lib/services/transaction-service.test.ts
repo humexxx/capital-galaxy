@@ -32,8 +32,15 @@ const updateMock = vi.fn<(...args: unknown[]) => unknown>(() => ({
   set: updateSet,
 }));
 
-// tx (transaction callback) gets its own update + findFirst captures.
-const txUpdateWhere = vi.fn<(...args: unknown[]) => unknown>();
+// tx (transaction callback) gets its own update + findFirst captures. The
+// pending-scoped updates end in `.returning()`, which resolves to one row so
+// the "somebody else settled it first" guard stays quiet by default.
+const txUpdateReturning = vi.fn<(...args: unknown[]) => unknown>(() =>
+  Promise.resolve([{ id: "tx-1" }])
+);
+const txUpdateWhere = vi.fn<(...args: unknown[]) => unknown>(() => ({
+  returning: txUpdateReturning,
+}));
 const txUpdateSet = vi.fn<(...args: unknown[]) => unknown>(() => ({
   where: txUpdateWhere,
 }));
@@ -143,7 +150,8 @@ beforeEach(() => {
   updateSet.mockReturnValue({ where: updateWhere });
   updateMock.mockReturnValue({ set: updateSet });
 
-  txUpdateWhere.mockResolvedValue(undefined);
+  txUpdateReturning.mockResolvedValue([{ id: TX_ID }]);
+  txUpdateWhere.mockReturnValue({ returning: txUpdateReturning });
   txUpdateSet.mockReturnValue({ where: txUpdateWhere });
   txUpdate.mockReturnValue({ set: txUpdateSet });
 });
@@ -300,6 +308,19 @@ describe("approveTransactionById", () => {
     expect(transactionMock).not.toHaveBeenCalled();
   });
 
+  it("refuses to approve a transaction that is no longer pending", async () => {
+    // Re-approving a settled buy used to reset currentValue to the original
+    // total, erasing every month of accrued interest.
+    findFirst.mockResolvedValueOnce(
+      makeTransaction({ type: "buy", total: "1000.00", status: "approved" })
+    );
+
+    await expect(approveTransactionById(ADMIN_ID, TX_ID)).rejects.toThrow(
+      /no longer pending/
+    );
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
   it("approves a buy and seeds initial/current value from total", async () => {
     const buyTx = makeTransaction({
       type: "buy",
@@ -437,8 +458,25 @@ describe("rejectTransactionById", () => {
     expect(updateMock).not.toHaveBeenCalled();
   });
 
+  it("refuses to reject a transaction that is already approved", async () => {
+    findFirst.mockResolvedValueOnce({
+      id: TX_ID,
+      portfolioId: PORTFOLIO_ID,
+      status: "approved",
+    });
+
+    await expect(rejectTransactionById(ADMIN_ID, TX_ID)).rejects.toThrow(
+      /no longer pending/
+    );
+    expect(updateMock).not.toHaveBeenCalled();
+  });
+
   it("marks the transaction rejected and returns its portfolioId", async () => {
-    findFirst.mockResolvedValueOnce({ id: TX_ID, portfolioId: PORTFOLIO_ID });
+    findFirst.mockResolvedValueOnce({
+      id: TX_ID,
+      portfolioId: PORTFOLIO_ID,
+      status: "pending",
+    });
 
     const result = await rejectTransactionById(ADMIN_ID, TX_ID);
 

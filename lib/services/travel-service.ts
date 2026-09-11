@@ -3,9 +3,10 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 import { cache } from "react";
 
-import { and, asc, desc, eq, inArray, isNull, notInArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, notInArray } from "drizzle-orm";
 
 import { db } from "@/db";
+import { tripCost } from "@/lib/travel/pricing";
 
 /** `[{ itemId, memberId }]` → `Map<itemId, memberId[]>`, for payers and attendees alike. */
 function groupByItem(rows: { itemId: string; memberId: string }[]): Map<string, string[]> {
@@ -417,7 +418,7 @@ export async function moveTripItem(
   await ensureTripOwnership(tripId, userId);
   const [row] = await db
     .update(tripItems)
-    .set({ scheduledOn: data.scheduledOn, endsOn: data.endsOn ?? null })
+    .set({ scheduledOn: data.scheduledOn, endsOn: data.endsOn ?? null, updatedAt: new Date() })
     .where(and(eq(tripItems.id, data.id), eq(tripItems.tripId, tripId)))
     .returning();
   if (!row) throw new Error("Item not found on this trip");
@@ -855,15 +856,22 @@ export async function getDashboardTravelSummary(
 
   let featured: DashboardTravelFeaturedTrip | null = null;
   if (pick) {
-    const items = await db
-      .select({ price: tripItems.price })
-      .from(tripItems)
-      .where(eq(tripItems.tripId, pick.id));
-    const totalEstimate = items.reduce((sum, row) => {
-      if (!row.price) return sum;
-      const n = parseFloat(row.price);
-      return Number.isFinite(n) ? sum + n : sum;
-    }, 0);
+    const [items, partySize] = await Promise.all([
+      db
+        .select({
+          price: tripItems.price,
+          priceMax: tripItems.priceMax,
+          priceUnit: tripItems.priceUnit,
+          scheduledOn: tripItems.scheduledOn,
+          endsOn: tripItems.endsOn,
+        })
+        .from(tripItems)
+        .where(eq(tripItems.tripId, pick.id)),
+      db.$count(tripMembers, eq(tripMembers.tripId, pick.id)),
+    ]);
+    // Same maths as the trip page: summing the raw column reported a
+    // three-night hotel at one night's price and a per-person fare once.
+    const totalEstimate = tripCost(items, Math.max(1, partySize)).low;
     featured = {
       ...pick,
       state: tripState(pick, today),
@@ -965,6 +973,20 @@ export async function setTripMembers(
 
   await db.transaction(async (tx) => {
     const keep = members.map((m) => m.id).filter((id): id is string => !!id);
+    // The FK sets trip_shares.member_id to NULL when a traveller goes, and a
+    // NULL scope is the WHOLE trip — a link made to show one person their bill
+    // would start publishing everyone's itinerary and prices. Revoke first.
+    await tx
+      .update(tripShares)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(
+          eq(tripShares.tripId, tripId),
+          isNotNull(tripShares.memberId),
+          isNull(tripShares.revokedAt),
+          ...(keep.length > 0 ? [notInArray(tripShares.memberId, keep)] : [])
+        )
+      );
     await tx
       .delete(tripMembers)
       .where(

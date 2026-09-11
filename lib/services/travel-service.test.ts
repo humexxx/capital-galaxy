@@ -70,6 +70,8 @@ function makeDeleteThenable(rows: unknown[]) {
 
 vi.mock("@/db", () => ({
   db: {
+    // Party size for the dashboard estimate.
+    $count: vi.fn(async () => 1),
     select: vi.fn(() => {
       const rows = selectQueue.shift() ?? [];
       return makeSelectThenable(rows);

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { Metadata } from "next";
 import { getAdminTransactions } from "@/lib/services/admin-service";
 import { DataTable } from "@/components/admin/transactions/data-table";
@@ -22,7 +23,12 @@ export default async function AdminTransactionsPage({
   await requireAdminOrRedirect();
 
   const params = await searchParams;
-  const userId = typeof params.userId === "string" ? params.userId : undefined;
+  // The filter box pushes every keystroke into the URL; a partial id bound
+  // into `users.id = $1` is a Postgres uuid syntax error, not "no rows".
+  const userId =
+    typeof params.userId === "string" && z.string().uuid().safeParse(params.userId).success
+      ? params.userId
+      : undefined;
 
   // If status param is missing, default to "pending". An explicit "all" disables the filter.
   let status: "pending" | "approved" | "rejected" | undefined;

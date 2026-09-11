@@ -125,7 +125,9 @@ export default async function PlanDetailPage({ params }: PageProps) {
           baseline.incomes,
           baseline.expenses,
           baseline.debts,
-          { portfolioValue, autoInvestRate }
+          // The same inputs as the projection beside it, or the recommended
+          // payoff date disagrees with the chart.
+          { portfolioValue, autoInvestRate, overrides: baseline.overrides }
         )
       : null;
 

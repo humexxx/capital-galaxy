@@ -20,8 +20,12 @@ export function shouldCreateTask(
     return false;
   }
 
+  // Whole calendar days (UTC), not elapsed hours: the cron stamps the exact
+  // run time, so a run a minute earlier than yesterday's — or a manual run
+  // the evening before — measured 23h59m and skipped the whole day.
   const lastCreated = new Date(lastTaskCreatedAt);
-  const daysSinceLastTask = Math.floor((now.getTime() - lastCreated.getTime()) / (1000 * 60 * 60 * 24));
+  const dayOf = (d: Date) => Math.floor(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) / 86_400_000);
+  const daysSinceLastTask = dayOf(now) - dayOf(lastCreated);
 
   switch (frequency) {
     case "daily":
@@ -32,8 +36,14 @@ export function shouldCreateTask(
       return daysSinceLastTask >= 7;
     case "biweekly":
       return daysSinceLastTask >= 14;
-    case "monthly":
-      return daysSinceLastTask >= 30;
+    case "monthly": {
+      // A new calendar month, not "30 days": 31-day months chained would
+      // otherwise drift the task later every month and skip some.
+      const months =
+        (now.getUTCFullYear() - lastCreated.getUTCFullYear()) * 12 +
+        (now.getUTCMonth() - lastCreated.getUTCMonth());
+      return months >= 1;
+    }
     default:
       return false;
   }

@@ -139,6 +139,7 @@ export default async function PortfolioPage() {
       id: t.id,
       date: t.date.toISOString(),
       methodName: t.methodName,
+      investorId: t.investorId,
       investorName: t.investorName,
       type: t.type,
       status: t.status,

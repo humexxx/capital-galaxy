@@ -32,6 +32,7 @@ vi.mock("./finance-plan-service", () => ({
   getPortfolioValueForUser: (...args: unknown[]) =>
     getPortfolioValueForUserMock(...args),
   getAutoInvestRate: (...args: unknown[]) => getAutoInvestRateMock(...args),
+  getPortfolioWeightedMonthlyRoi: vi.fn(async () => 0),
   projectPlan: (...args: unknown[]) => projectPlanMock(...args),
 }));
 

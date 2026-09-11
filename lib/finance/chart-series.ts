@@ -143,6 +143,26 @@ export function mapPortfolioValues(
   });
 }
 
+/**
+ * "Debt-free in N months" counted from TODAY.
+ *
+ * `projection.monthsToDebtFree` is measured from the plan's first period, so
+ * a plan created two years ago that cleared its debt at period 30 kept saying
+ * "30 mo" long after the fact. 0 means already there; null means never within
+ * the horizon.
+ */
+export function debtFreeMonthsFromNow(
+  projection: Projection,
+  today: Date = new Date()
+): number | null {
+  if (projection.monthsToDebtFree === null) return null;
+  const base = projection.months[0]?.date;
+  if (!base) return projection.monthsToDebtFree;
+  const anchorDay = projection.plan.confirmationDayOfMonth;
+  const todayIdx = Math.max(0, periodIndexForDate(base, anchorDay, today));
+  return Math.max(0, projection.monthsToDebtFree - todayIdx);
+}
+
 export function buildChartSeries(
   history: PlanHistoryPoint[],
   projection: Projection,

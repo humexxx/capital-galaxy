@@ -26,12 +26,14 @@ export function PublicTripViews({
   aside,
   trip,
   viewer,
+  showPrices,
 }: {
   banner: ReactNode;
   list: ReactNode;
   aside: ReactNode;
   trip: TripWithRelations;
   viewer: ItineraryViewer | null;
+  showPrices: boolean;
 }) {
   const [view, setView] = useState<"list" | "calendar">("list");
 
@@ -74,7 +76,13 @@ export function PublicTripViews({
           {view === "list" ? (
             list
           ) : (
-            <TripCalendar trip={trip} partySize={1} viewer={viewer} readOnly />
+            <TripCalendar
+              trip={trip}
+              partySize={1}
+              viewer={viewer}
+              readOnly
+              showPrices={showPrices}
+            />
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-6">{aside}</div>

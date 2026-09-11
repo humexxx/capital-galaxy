@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
   const origin = requestUrl.origin
-  const next = requestUrl.searchParams.get("next") || "/portal"
+  // Same rule the login form applies client-side: a path on this origin only.
+  // `${origin}${next}` with `next=@evil.com` used to resolve to evil.com.
+  const rawNext = requestUrl.searchParams.get("next")
+  const next =
+    rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/portal"
 
   const loginWithError = (message: string) =>
     NextResponse.redirect(
@@ -46,5 +50,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}${next}`)
+  return NextResponse.redirect(new URL(next, origin))
 }

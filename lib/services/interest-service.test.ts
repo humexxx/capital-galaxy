@@ -21,7 +21,7 @@ vi.mock("@/db", () => ({
   },
 }));
 
-import { applyMonthlyInterest } from "./interest-service";
+import { applyMonthlyInterest, interestAppliedThisMonth } from "./interest-service";
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -151,5 +151,19 @@ describe("applyMonthlyInterest", () => {
     const opts = findMany.mock.calls[0][0];
     expect(opts).toBeTruthy();
     expect(opts.where).toBeTruthy();
+  });
+});
+
+// ---------- interestAppliedThisMonth ----------
+
+describe("interestAppliedThisMonth", () => {
+  it("is true only when the recorded run falls in today's UTC month", () => {
+    const today = new Date("2026-10-01T00:05:00Z");
+    // The 1st used to bypass this check entirely, so a retry on that day
+    // compounded a second month onto every position.
+    expect(interestAppliedThisMonth("2026-10-01T00:00:10Z", today)).toBe(true);
+    expect(interestAppliedThisMonth("2026-09-30T23:59:00Z", today)).toBe(false);
+    expect(interestAppliedThisMonth(null, today)).toBe(false);
+    expect(interestAppliedThisMonth("not a date", today)).toBe(false);
   });
 });

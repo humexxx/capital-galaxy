@@ -40,7 +40,7 @@ describe("recentAndNext", () => {
       ...["2026-06-03", "2026-06-05", "2026-06-08"].map((d) => game(d, true)),
       ...["2026-10-20", "2026-10-21"].map((d) => game(d)),
     ];
-    const out = recentAndNext(games as never, "2026-08-24");
+    const out = recentAndNext(games as never);
 
     expect(out.map((g) => g.date)).toEqual([
       "2026-06-03", "2026-06-05", "2026-06-08", "2026-10-20", "2026-10-21",
@@ -51,7 +51,7 @@ describe("recentAndNext", () => {
     const games = Array.from({ length: 20 }, (_, i) =>
       game(`2026-01-${String(i + 1).padStart(2, "0")}`, i < 10)
     );
-    const out = recentAndNext(games as never, "2026-01-10");
+    const out = recentAndNext(games as never);
 
     expect(out).toHaveLength(12);
     expect(out[0].date).toBe("2026-01-05");

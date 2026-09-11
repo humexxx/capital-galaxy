@@ -35,6 +35,9 @@ export function AirportPicker({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [highlight, setHighlight] = useState(0);
+  // Whether the user has reached for a suggestion (arrow keys / hover). Enter
+  // otherwise keeps submitting the form, as the comment below promised.
+  const [armed, setArmed] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
 
   const query = value.trim();
@@ -57,6 +60,7 @@ export function AirportPicker({
       if (cancelled) return;
       setResults(hits);
       setHighlight(0);
+      setArmed(false);
       setLoading(false);
     }, 180);
 
@@ -102,13 +106,16 @@ export function AirportPicker({
           if (!open || visible.length === 0) return;
           if (e.key === "ArrowDown") {
             e.preventDefault();
+            setArmed(true);
             setHighlight((h) => (h + 1) % visible.length);
           } else if (e.key === "ArrowUp") {
             e.preventDefault();
+            setArmed(true);
             setHighlight((h) => (h - 1 + visible.length) % visible.length);
           } else if (e.key === "Enter") {
             // Only steal Enter when a suggestion is actually highlighted —
             // otherwise it must keep submitting the form.
+            if (!armed) return;
             e.preventDefault();
             pick(visible[highlight]);
           } else if (e.key === "Escape") {
@@ -142,7 +149,10 @@ export function AirportPicker({
                   "flex w-full items-center gap-2 rounded px-2 py-1.5 text-left",
                   i === highlight ? "bg-accent" : "hover:bg-accent/60"
                 )}
-                onMouseEnter={() => setHighlight(i)}
+                onMouseEnter={() => {
+                  setHighlight(i);
+                  setArmed(true);
+                }}
                 onClick={() => pick(a)}
               >
                 <span className="text-base leading-none">{a.flag}</span>

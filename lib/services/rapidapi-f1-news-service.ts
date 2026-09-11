@@ -84,9 +84,13 @@ export async function refreshF1News(): Promise<{ fetched: number; stored: number
 
   if (rows.length === 0) return { fetched: articles.length, stored: 0 };
 
+  // ON CONFLICT DO UPDATE cannot touch the same row twice in one statement:
+  // a repeated id in the provider's window failed the whole refresh.
+  const unique = [...new Map(rows.map((r) => [r.articleId, r])).values()];
+
   await db
     .insert(f1News)
-    .values(rows)
+    .values(unique)
     .onConflictDoUpdate({
       target: f1News.articleId,
       set: {
@@ -131,7 +135,7 @@ export async function getOtherF1News(
     .select()
     .from(f1News)
     .where(ne(f1News.articleId, excludeArticleId))
-    .orderBy(desc(f1News.firstSeenAt))
+    .orderBy(desc(f1News.firstSeenAt), desc(f1News.articleId))
     .limit(limit);
 
   return rows.map((r) => ({
@@ -154,7 +158,7 @@ export async function getF1News(limit = 12): Promise<F1NewsArticle[]> {
   const rows = await db
     .select()
     .from(f1News)
-    .orderBy(desc(f1News.firstSeenAt))
+    .orderBy(desc(f1News.firstSeenAt), desc(f1News.articleId))
     .limit(limit);
 
   return rows.map((r) => ({

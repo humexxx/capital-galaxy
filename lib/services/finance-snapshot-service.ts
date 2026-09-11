@@ -14,6 +14,7 @@ import {
   getAutoInvestRate,
   getPlanWithLines,
   getPortfolioValueForUser,
+  getPortfolioWeightedMonthlyRoi,
   projectPlan,
 } from "./finance-plan-service";
 import {
@@ -89,9 +90,14 @@ async function computeStateAt(
 ): Promise<{ state: ProjectionMonth | null; calibrated: FinancePlanWithLines }> {
   const calibrated = await buildCalibratedPlan(plan);
 
-  const [portfolioValue, autoInvestRate] = await Promise.all([
+  const [portfolioValue, portfolioMonthlyGrowthRate, autoInvestRate] = await Promise.all([
     calibrated.includePortfolio
       ? getPortfolioValueForUser(userId)
+      : Promise.resolve(0),
+    // Same growth the chart's forecast applies, so a snapshot and the dashed
+    // line agree on what the portfolio is worth in a given period.
+    calibrated.includePortfolio
+      ? getPortfolioWeightedMonthlyRoi(userId)
       : Promise.resolve(0),
     getAutoInvestRate(calibrated),
   ]);
@@ -103,6 +109,7 @@ async function computeStateAt(
     calibrated.debts,
     {
       portfolioValue,
+      portfolioMonthlyGrowthRate,
       autoInvestRate,
       overrides: calibrated.overrides,
     }
@@ -137,8 +144,10 @@ async function computeStateAt(
       investmentsContribution: 0,
       investmentsInterest: 0,
       totalDebt,
-      portfolioValue: 0,
-      netWorth: savings + investments - totalDebt,
+      // The portfolio exists on day one too; leaving it out made the
+      // confirmation-day snapshot drop a cliff the size of the portfolio.
+      portfolioValue,
+      netWorth: savings + investments + portfolioValue - totalDebt,
       debts: calibrated.debts.map((d) => ({
         debtId: d.id,
         name: d.name,

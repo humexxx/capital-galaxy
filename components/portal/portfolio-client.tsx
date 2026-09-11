@@ -201,8 +201,10 @@ export default function PortfolioClientPage({ data }: { data: PortfolioData }) {
         .filter((b) => !b.isOwn)
         .map((b) => ({
           ...b,
+          // By id: two investors can share a display name (or both fall back
+          // to "Unknown"), and the name join summed their movements together.
           movements: data.investorTransactions.filter(
-            (t) => t.investorName === b.name
+            (t) => t.investorId === b.investorId
           ).length,
         })),
     [data.investorBreakdown, data.investorTransactions]

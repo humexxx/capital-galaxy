@@ -155,10 +155,14 @@ describe("shouldCreateTask", () => {
   });
 
   describe("daily", () => {
-    it("skips when last task was less than 1 day ago", () => {
+    it("skips when the last task was created earlier the same day", () => {
       // 23h ago → Math.floor(23h / day) = 0
-      const lastCreated = new Date(NOW.getTime() - 23 * 60 * 60 * 1000);
+      // Calendar days, not elapsed hours: a run 23h after yesterday's must
+      // still fire (see the next test); one 8h after today's must not.
+      const lastCreated = new Date(NOW.getTime() - 8 * 60 * 60 * 1000);
       expect(shouldCreateTask("daily", lastCreated, daysAgo(30))).toBe(false);
+      const yesterdayLate = new Date(NOW.getTime() - 23 * 60 * 60 * 1000);
+      expect(shouldCreateTask("daily", yesterdayLate, daysAgo(30))).toBe(true);
     });
 
     it("fires at the 1-day boundary", () => {
@@ -209,15 +213,17 @@ describe("shouldCreateTask", () => {
   });
 
   describe("monthly", () => {
-    it("skips at 29 days", () => {
+    it("skips within the same calendar month", () => {
+      // NOW is Jun 15; ten days ago is still June.
       expect(
-        shouldCreateTask("monthly", daysAgo(29), daysAgo(120))
+        shouldCreateTask("monthly", daysAgo(10), daysAgo(120))
       ).toBe(false);
     });
 
-    it("fires at the 30-day boundary", () => {
+    it("fires once the calendar month changes, even before 30 days", () => {
+      // 29 days ago is May 17 — a new month has started since.
       expect(
-        shouldCreateTask("monthly", daysAgo(30), daysAgo(120))
+        shouldCreateTask("monthly", daysAgo(29), daysAgo(120))
       ).toBe(true);
     });
   });

@@ -1,0 +1,1 @@
+ALTER TABLE "finance_plan_confirmations" DROP CONSTRAINT "finance_plan_confirmations_savings_chk";

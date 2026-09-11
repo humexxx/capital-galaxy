@@ -21,6 +21,8 @@ export type TransactionType = "buy" | "withdrawal";
 export interface PortfolioStats {
   totalValue: number;
   costBasis: number;
+  /** Approved withdrawals — money already taken out, still part of the return. */
+  totalWithdrawn: number;
   allTimeProfit: number;
   allTimeProfitPercentage: number;
   totalInvestmentMethods: number;

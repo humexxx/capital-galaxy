@@ -45,6 +45,11 @@ vi.mock("@/db", () => ({
         insert: (...args: unknown[]) => insertMock(...args),
         update: (...args: unknown[]) => updateMock(...args),
         delete: (...args: unknown[]) => deleteMock(...args),
+        query: {
+          roadPathProgress: {
+            findFirst: (...args: unknown[]) => roadPathProgressFindFirst(...args),
+          },
+        },
       }),
   },
 }));
@@ -700,7 +705,7 @@ describe("deleteRoadPathProgress", () => {
     expect(updateChain.set.mock.calls[0][0].currentValue).toBe("33");
   });
 
-  it("skips the parent update when no progress entries remain", async () => {
+  it("resets the parent to 0 when no progress entries remain", async () => {
     roadPathProgressFindFirst
       .mockResolvedValueOnce({
         ...buildProgress(),
@@ -709,11 +714,14 @@ describe("deleteRoadPathProgress", () => {
       .mockResolvedValueOnce(undefined);
 
     mockDeleteWhere();
+    const updateChain = mockUpdateNoReturning();
 
     await deleteRoadPathProgress(PROGRESS_ID, USER_ID);
 
     expect(deleteMock).toHaveBeenCalledTimes(1);
-    expect(updateMock).not.toHaveBeenCalled();
+    // The deleted figure must not linger as currentValue.
+    expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(updateChain.set.mock.calls[0][0]).toMatchObject({ currentValue: "0" });
   });
 });
 

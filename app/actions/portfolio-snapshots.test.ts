@@ -10,6 +10,7 @@ vi.mock("@/lib/services/auth-server", () => ({
 
 vi.mock("@/lib/services/interest-service", () => ({
   applyMonthlyInterest: vi.fn(),
+  markInterestApplied: vi.fn(),
 }));
 
 vi.mock("@/lib/services/snapshot-service", () => ({

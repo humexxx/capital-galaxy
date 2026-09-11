@@ -13,8 +13,7 @@ import { methodAllocations } from "@/db/schema";
 import {
   splitContribution,
   unitsFor,
-  type Allocation,
-} from "@/lib/finance/allocation";
+  type Allocation, isCompleteAllocation } from "@/lib/finance/allocation";
 import { closeOnOrBefore, fetchDailyCloses } from "./price-providers/massive";
 
 export type MethodAllocationRow = {
@@ -46,6 +45,9 @@ export async function setMethodAllocations(
   methodId: string,
   allocations: Allocation[]
 ): Promise<void> {
+  if (allocations.length > 0 && !isCompleteAllocation(allocations)) {
+    throw new Error("Allocations must total 100%");
+  }
   await db.transaction(async (tx) => {
     await tx.delete(methodAllocations).where(eq(methodAllocations.methodId, methodId));
     if (allocations.length > 0) {
@@ -179,6 +181,14 @@ export async function backfillTransactionAllocations(
       skipped++;
       continue;
     }
+    // splitContribution hands the last slice the remainder, so a policy that
+    // does not reach 100% would silently overweight its last asset — forever,
+    // since the allocation rows are immutable.
+    if (!isCompleteAllocation(policy)) {
+      skipped++;
+      errors.push(`method ${t.methodId} allocation policy does not total 100%`);
+      continue;
+    }
 
     const day = new Date(t.date).toISOString().slice(0, 10);
     const amount = parseFloat(t.total);
@@ -256,7 +266,9 @@ export async function getDerivedHoldings(methodIds: string[]) {
     .where(
       and(
         inArray(transactions.investmentMethodId, methodIds),
-        eq(transactions.status, "approved")
+        // A buy drained by withdrawals flips to "closed" but its units were
+        // real; dropping them left the withdrawal's negative units unmatched.
+        inArray(transactions.status, ["approved", "closed"])
       )
     );
 }

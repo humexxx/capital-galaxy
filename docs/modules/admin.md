@@ -1,7 +1,7 @@
 # Admin
 
 > **Status:** Active
-> **Last reviewed:** 2026-09-03
+> **Last reviewed:** 2026-09-11
 
 ## Overview
 Admin-only operations: user management, transaction approval queue, and
@@ -47,4 +47,5 @@ impersonation (with audit trail).
 - Impersonation must always write to `impersonation_logs` — never bypass.
 - Admin actions throw on error (caught by `app/portal/admin/error.tsx`, falling back to `app/portal/error.tsx`); they do **not** return `{ success: false, error }`.
 - `app/portal/admin/loading.tsx` provides a table skeleton; `app/portal/admin/error.tsx` is the module error boundary.
+- The role-change dialog's copy is driven by `ROLE_META[nextRole]`, so promoting to provider no longer reads "Demote to user?".
 - **The users table sets any of the three roles** (`USER_ROLES` from `types/user.ts` drives the menu). It used to toggle admin↔user only, which made `provider` unreachable and demoted a provider to admin by accident.

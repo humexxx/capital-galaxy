@@ -261,7 +261,9 @@ export function ItemForm({
         toCode: toCode.trim() || null,
         roundTrip,
         scheduledOn: scheduledOn || null,
-        endsOn: endsOn || null,
+        // The field is hidden for categories without a stay (and one-way
+        // flights); the old value must not ride along invisibly.
+        endsOn: showEnd ? endsOn || null : null,
         videoUrl: videoUrl.trim() || null,
         notes: notes.trim() || null,
         payerIds,

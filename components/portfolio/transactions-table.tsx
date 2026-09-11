@@ -39,6 +39,7 @@ export type TransactionRow = {
   date: string;
   methodName: string;
   /** Only set on rows belonging to somebody else. */
+  investorId?: string;
   investorName?: string | null;
   type: TransactionType;
   status: TransactionStatus;

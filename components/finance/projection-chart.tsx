@@ -394,7 +394,12 @@ export function ProjectionChart({
       for (let i = 1; i < rows.length; i++) {
         const prev = rows[i - 1].rawValue;
         const curr = rows[i].rawValue;
-        if ((prev < m && curr >= m) || (prev > m && curr <= m)) {
+        if (
+          (prev < m && curr >= m) ||
+          (prev > m && curr <= m) ||
+          // Starting exactly on the milestone (0 is the common case) counts.
+          (i === 1 && prev === m)
+        ) {
           const span = curr - prev;
           const t = span === 0 ? 0 : (m - prev) / span;
           const x = i - 1 + Math.max(0, Math.min(1, t));
@@ -736,8 +741,13 @@ export function ComparePlansChart({
     // Window the plot around today. Rows are indexed (not calendar-joined), so
     // the boundary is derived from the first projection's dates — the same basis
     // the row labels already use.
+    // The plans' own anchor day, not 1: with anchor 15 on the 10th, day-1
+    // bucketing put "today" one period ahead and painted a forecast period solid.
+    const anchorDay = projections[0].plan.confirmationDayOfMonth > 0
+      ? projections[0].plan.confirmationDayOfMonth
+      : 1;
     const window = months
-      ? computeProjectionWindow(projections[0], months, new Date(), 1, pastMonths)
+      ? computeProjectionWindow(projections[0], months, new Date(), anchorDay, pastMonths)
       : { startIndex: 0, count: maxMonths, pastCount: 0, todayIndex: 0 };
     const boundary = months ? window.pastCount : -1;
 
@@ -754,7 +764,9 @@ export function ComparePlansChart({
       };
       for (const { proj, key } of seriesByPlan) {
         const m = proj.months[srcIdx];
-        const value = m ? Number(m[metric].toFixed(2)) : 0;
+        // Past the end of a shorter plan there is no value — null leaves the
+        // line where it stopped instead of dropping it to $0 along the axis.
+        const value = m ? Number(m[metric].toFixed(2)) : null;
         // The boundary row carries BOTH keys so the solid and dashed segments
         // meet instead of leaving a gap at today.
         row[`${key}Past`] = boundary < 0 || i <= boundary ? value : null;

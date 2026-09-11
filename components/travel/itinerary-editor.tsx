@@ -68,7 +68,7 @@ export function ItineraryEditor({
         stops: filled.map((r, i) => ({
           // Renumber on save: deleting day 3 of eight should not leave a gap
           // the reader has to explain to themselves.
-          dayNumber: Number(r.dayNumber) || i + 1,
+          dayNumber: i + 1,
           stopOn: r.stopOn || null,
           place: r.place.trim(),
           note: r.note.trim() || null,
@@ -142,7 +142,11 @@ export function ItineraryEditor({
           size="sm"
           variant="ghost"
           onClick={() =>
-            setRows((prev) => [...prev, blank(prev.length + 1)])
+            setRows((prev) =>
+              // After the highest day present, not `length + 1`: deleting
+              // day 2 of four and adding one produced a second "day 4".
+              [...prev, blank(Math.max(0, ...prev.map((r) => Number(r.dayNumber) || 0)) + 1)]
+            )
           }
         >
           <Plus className="size-4" /> Add day

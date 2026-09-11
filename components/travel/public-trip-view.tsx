@@ -95,8 +95,12 @@ export function PublicTripViewRenderer({ view }: { view: PublicTripView }) {
    * — so it gets a trip with those emptied and the scope's own per-item
    * figures as the viewer.
    */
+  // Everything the banner and calendar read, minus the owner's auth id — this
+  // lands in the RSC payload of a page anybody with the link can open.
+  const { userId: _ownerId, ...tripPublic } = trip;
+  void _ownerId;
   const asTrip = {
-    ...trip,
+    ...tripPublic,
     items,
     photos,
     members: [],
@@ -291,7 +295,7 @@ export function PublicTripViewRenderer({ view }: { view: PublicTripView }) {
                                   </a>
                                 )}
                               </div>
-                              {item.notes && (
+                              {showPrices && item.notes && (
                                 <Text variant="small">{item.notes}</Text>
                               )}
                               {item.stops.length > 0 && (
@@ -419,6 +423,7 @@ export function PublicTripViewRenderer({ view }: { view: PublicTripView }) {
       aside={aside}
       trip={asTrip}
       viewer={publicViewer}
+      showPrices={showPrices}
     />
   );
 }

@@ -104,6 +104,22 @@ export function PlansWorkspace({
   const [selected, setSelected] = useState<Set<string>>(
     new Set(plans.map((p) => p.id))
   );
+  // A plan cloned or created after mount arrives through router.refresh(),
+  // which reconciles rather than remounts — so it has to be added to the
+  // selection here or the copy shows up unchecked, with no line on the chart.
+  const [knownIds, setKnownIds] = useState<string[]>(() => plans.map((p) => p.id));
+  const currentIds = plans.map((p) => p.id);
+  if (
+    currentIds.length !== knownIds.length ||
+    currentIds.some((id, i) => id !== knownIds[i])
+  ) {
+    const known = new Set(knownIds);
+    const added = currentIds.filter((id) => !known.has(id));
+    setKnownIds(currentIds);
+    if (added.length > 0) {
+      setSelected((prev) => new Set([...prev, ...added]));
+    }
+  }
   const [metric, setMetric] = useState<Metric>("netWorth");
   const [range, setRange] = useState<string>(DEFAULT_RANGE);
   // "Full plan" still windows (so past stays solid and future dashed) — it just
@@ -314,7 +330,9 @@ export function PlansWorkspace({
                           <span aria-hidden="true">·</span>
                           {s.monthsToDebtFree !== null ? (
                             <span className={POSITIVE}>
-                              Debt-free {s.monthsToDebtFree} mo
+                              {s.monthsToDebtFree === 0
+                                ? "Debt-free"
+                                : `Debt-free in ${s.monthsToDebtFree} mo`}
                             </span>
                           ) : s.endingDebt <= 0.01 ? (
                             <span>No debt</span>

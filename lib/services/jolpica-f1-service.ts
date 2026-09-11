@@ -270,11 +270,23 @@ async function fetchJolpica<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
-function deriveRaceStatus(date: string, hasResults: boolean): F1Race["status"] {
+/**
+ * `time` is Jolpica's race start (HH:MM:SSZ); without one the whole day is
+ * treated as the live window. Nothing used to return "live" at all, so the
+ * dashboard's Live pill for F1 was dead code.
+ */
+function deriveRaceStatus(
+  date: string,
+  hasResults: boolean,
+  time?: string | null
+): F1Race["status"] {
   if (hasResults) return "completed";
-  const raceDate = new Date(`${date}T23:59:59Z`).getTime();
   const now = Date.now();
-  if (raceDate < now - 24 * 60 * 60 * 1000) return "completed";
+  const dayEnd = new Date(`${date}T23:59:59Z`).getTime();
+  if (dayEnd < now - 24 * 60 * 60 * 1000) return "completed";
+  const start = time ? new Date(`${date}T${time}`).getTime() : new Date(`${date}T00:00:00Z`).getTime();
+  const end = time ? start + 3 * 60 * 60 * 1000 : dayEnd;
+  if (!Number.isNaN(start) && now >= start && now <= end) return "live";
   return "upcoming";
 }
 
@@ -324,7 +336,7 @@ function mapRaces(
 ): F1Race[] {
   return scheduleRaces.map((race) => {
     const results = resultsByRound.get(race.round);
-    const status = deriveRaceStatus(race.date, !!results && results.length > 0);
+    const status = deriveRaceStatus(race.date, !!results && results.length > 0, race.time);
     const podium =
       status === "completed" && results && results.length >= 3
         ? ([

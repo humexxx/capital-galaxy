@@ -256,3 +256,33 @@ describe("an item only some travellers are on", () => {
     expect(shares.find((s) => s.memberId === "ana")!.owedLow).toBe(0);
   });
 });
+
+describe("splitTrip — remainder and seats", () => {
+  it("scales fixed shares up when every traveller is fixed and they total under 100", () => {
+    const a: SplitMember = { id: "a", name: "A", sharePercent: 30 };
+    const b: SplitMember = { id: "b", name: "B", sharePercent: 30 };
+    const [ra, rb] = splitTrip([item({ price: "100.00" })], [a, b]);
+    // 30/30 used to leave $40 owed by nobody.
+    expect(ra.owedLow).toBe(50);
+    expect(rb.owedLow).toBe(50);
+  });
+
+  it("charges named payers for the attendees' per-person seats they cover", () => {
+    const cee: SplitMember = { id: "cee", name: "Cee", sharePercent: null };
+    const [a, b, c] = splitTrip(
+      [
+        item({
+          price: "1900.00",
+          priceUnit: "per_person",
+          attendeeIds: ["ana", "bea", "cee"],
+          payerIds: ["ana"],
+        }),
+      ],
+      [ana, bea, cee]
+    );
+    // Three seats on the itinerary ($5,700); one payer carries them all.
+    expect(a.owedLow).toBe(5700);
+    expect(b.owedLow).toBe(0);
+    expect(c.owedLow).toBe(0);
+  });
+});

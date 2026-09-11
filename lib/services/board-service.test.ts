@@ -314,13 +314,25 @@ describe("updateBoardTask", () => {
 // ---------- deleteBoardTask ----------
 
 describe("deleteBoardTask", () => {
-  it("issues a delete scoped by (id, userId)", async () => {
-    deleteWhereMock.mockResolvedValueOnce(undefined);
+  it("deletes scoped by (id, userId) and closes the order gap below it", async () => {
+    deleteWhereMock.mockReturnValueOnce({
+      returning: () => Promise.resolve([{ columnId: COLUMN_ID, order: 1 }]),
+    });
 
     await deleteBoardTask(TASK_ID, USER_ID);
 
     expect(deleteMock).toHaveBeenCalledOnce();
     expect(deleteWhereMock).toHaveBeenCalledOnce();
+    // Tasks after the deleted one shift down so `order` stays contiguous.
+    expect(updateMock).toHaveBeenCalledOnce();
+  });
+
+  it("does nothing more when the task did not exist", async () => {
+    deleteWhereMock.mockReturnValueOnce({ returning: () => Promise.resolve([]) });
+
+    await deleteBoardTask(TASK_ID, USER_ID);
+
+    expect(updateMock).not.toHaveBeenCalled();
   });
 });
 

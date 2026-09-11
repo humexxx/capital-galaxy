@@ -1054,6 +1054,9 @@ export function projectPlan(
 
   const months: ProjectionMonth[] = [];
   let monthsToDebtFree: number | null = null;
+  // A debt list whose balances are all zero is no debt: without this a plan
+  // with a paid-off card reported "debt-free in 1 mo" forever.
+  const hadDebt = debts.some((d) => num(d.initialBalance) > DEBT_PAID_EPS);
   let totalInterestPaidAcrossAllDebts = 0;
   let totalInvestmentsInterestAcrossMonths = 0;
 
@@ -1303,7 +1306,7 @@ export function projectPlan(
     const totalDebt = debtStates.reduce((s, d) => s + d.balance, 0);
     const netWorth = savings + investments + portfolio - totalDebt;
 
-    if (monthsToDebtFree === null && totalDebt <= DEBT_PAID_EPS && debts.length > 0) {
+    if (monthsToDebtFree === null && totalDebt <= DEBT_PAID_EPS && hadDebt) {
       monthsToDebtFree = m + 1;
     }
 

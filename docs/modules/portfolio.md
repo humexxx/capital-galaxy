@@ -1,7 +1,7 @@
 # Portfolio
 
 > **Status:** Active (page redesigned to mirror plan-editor layout)
-> **Last reviewed:** 2026-09-03
+> **Last reviewed:** 2026-09-11
 
 ## Overview
 Tracks the user's real portfolio: transactions (buys/withdrawals), historical
@@ -55,6 +55,7 @@ metadata. Interest math is shared with [Finance](./finance.md).
 - `app_state` — global key-value (cron state, etc.) — also touched by other modules
 
 ## Notes
+- **Logic audit (2026-09-11).** Monthly interest is idempotent per calendar month: the cron consults `last_interest_run` on every day (the 1st included), a failure writes `last_interest_error` instead, and the admin's manual "apply interest" marks the run too (`markInterestApplied`). Approve/reject only move a `pending` row (re-approval used to reset accrued value). `PortfolioStats.totalWithdrawn` and `getPortfolioAssets` add approved withdrawals back into profit. `getDerivedHoldings` keeps `closed` buys' units; `backfillTransactionAllocations` and `setMethodAllocations` require a policy that totals 100%. The performance chart no longer fabricates a $0 origin. Daily snapshots skip a portfolio already snapshotted today; `COUNT(*)` is cast to int. The investor summary joins on `investorId`; the admin filter ignores a non-UUID user id; the CSV signs withdrawals.
 - **Owner-only panels load on demand.** `MarginChart` and `InvestorBreakdown`
   are `next/dynamic` in `portfolio-client.tsx`, so an investor's bundle does not
   carry the owner dashboard. `getUserPortfolio` / `getPortfolioStats` /

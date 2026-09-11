@@ -1,7 +1,7 @@
 # Productivity
 
 > **Status:** Active
-> **Last reviewed:** 2026-09-03
+> **Last reviewed:** 2026-09-11
 
 ## Overview
 Two surfaces: a personal kanban *board* for day-to-day tasks, and *road paths*
@@ -47,6 +47,7 @@ auto-generated tasks.
   and surfaced under the other user's column.
 - `/portal/productivity` has no page, so mutations revalidate it with the
   `"layout"` type — the default `"page"` type matched nothing.
+- **Logic audit (2026-09-11).** `deleteBoardTask` closes the `order` gap so the positional reorder maths stays right; moving a task to another column from the dialog goes through `reorderBoardTaskAction` first. Task automation compares calendar days / months (UTC), not elapsed hours. Road-path `currentValue` follows the newest entry by date (and resets to 0 when none remain); `totalProgress` is clamped to 0–100 and `daysRemaining` to ≥ 0. `MonthPicker` builds dates from parts so the 31st never rolls over.
 - Auto-task generation runs on the daily cron — see `task-automation.ts`.
 - Board UI keeps optimistic state locally with explicit rollback on error (not via React 19's `useOptimistic`) because the DnD reorder queue depends on a stable local state model.
 - **A server action reports failure in its return value; only a crash throws.**

@@ -119,6 +119,7 @@ import {
 } from "@/lib/finance/chart-series";
 import type {
   DebtStrategy,
+  FinancePlanLineOverride,
   FinancePlanWithLines,
   Projection,
   ProjectionMonth,
@@ -260,6 +261,33 @@ export function PlanEditor({
     Math.max(0, projection.months.length - 1)
   );
   const today = projection.months[currentPeriodIdx];
+  // What the confirmation dialog pre-fills: the OPENING of the current period
+  // (= the previous period's close, or the calibrated initials for the first
+  // period). That is exactly what saveConfirmation stores as the new baseline;
+  // pre-filling the close made a blind Save jump the baseline a whole period.
+  const periodOpening =
+    currentPeriodIdx > 0
+      ? (() => {
+          const prev = projection.months[currentPeriodIdx - 1];
+          return {
+            savings: prev.savings,
+            investments: prev.investments,
+            debts: prev.debts.map((d) => ({
+              debtId: d.debtId,
+              name: d.name,
+              balance: d.balance,
+            })),
+          };
+        })()
+      : {
+          savings: parseFloat(baseline.initialSavings),
+          investments: parseFloat(baseline.initialInvestments),
+          debts: baseline.debts.map((d) => ({
+            debtId: d.id,
+            name: d.name,
+            balance: parseFloat(d.initialBalance),
+          })),
+        };
   const income = today?.income ?? 0;
   const livingExpenses = today?.expenses ?? 0;
   const minDebtPayments = today?.scheduledDebtPayments ?? 0;
@@ -869,23 +897,20 @@ export function PlanEditor({
           period instead), and force-openable from the dev drawer's Finance
           section. Saving it writes a real confirmation and recalibrates the
           projection, exactly like the dashboard prompt. */}
-      <ConfirmationDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        planId={plan.id}
-        planName={plan.name}
-        monthLabel={confirmDialogLabel}
-        projected={{
-          savings: today?.savings ?? 0,
-          investments: today?.investments ?? 0,
-          debts: (today?.debts ?? []).map((d) => ({
-            debtId: d.debtId,
-            name: d.name,
-            balance: d.balance,
-          })),
-        }}
-        debts={plan.debts}
-      />
+      {/* Mounted only while open: the dialog seeds its inputs from props once,
+          so a debt added after mount, or figures refreshed by an edit, would
+          otherwise never reach it (and a new debt was confirmed at $0). */}
+      {confirmOpen && (
+        <ConfirmationDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          planId={plan.id}
+          planName={plan.name}
+          monthLabel={confirmDialogLabel}
+          projected={periodOpening}
+          debts={plan.debts}
+        />
+      )}
     </Tabs>
   );
 }
@@ -1393,6 +1418,31 @@ function computeTodaySnapshot(
     }
   }
 
+  // Per-month overrides, indexed the way projectPlan indexes them. Without
+  // this the Today KPI (and the chart's today dot, which copies it) still
+  // charged a rent the user had skipped for this month.
+  const overrideIndex = new Map<string, FinancePlanLineOverride>();
+  for (const o of plan.overrides ?? []) {
+    const [y, mo] = o.monthYear.slice(0, 10).split("-").map(Number);
+    if (!y || !mo) continue;
+    overrideIndex.set(`${o.parentSide}:${o.parentId}:${y * 12 + (mo - 1)}`, o);
+  }
+  const overriddenAmount = (
+    side: "income" | "expense",
+    id: string,
+    year: number,
+    monthIdx: number,
+    base: number
+  ): number | null => {
+    const ov = overrideIndex.get(`${side}:${id}:${year * 12 + monthIdx}`);
+    if (!ov) return base;
+    if (ov.action === "skip") return null;
+    if (ov.action === "amount" && ov.monthlyAmount !== null) {
+      return Math.max(0, Number(ov.monthlyAmount));
+    }
+    return base;
+  };
+
   // ---- Income / expense cashflow ------------------------------------------
   for (const inc of plan.incomes) {
     if (inc.kind === "one_time") {
@@ -1410,7 +1460,9 @@ function computeTodaySnapshot(
       ) {
         continue;
       }
-      savings += Number(inc.monthlyAmount);
+      const amount = overriddenAmount("income", inc.id, cm.year, cm.monthIdx, Number(inc.monthlyAmount));
+      if (amount === null) continue;
+      savings += amount;
     }
   }
   for (const exp of plan.expenses) {
@@ -1426,7 +1478,9 @@ function computeTodaySnapshot(
     for (const cm of touchedMonths) {
       const hitDay = recurringHitDayInMonth(exp, cm.year, cm.monthIdx, planStart);
       if (hitDay === null || !hitIsLive(cm.year, cm.monthIdx, hitDay)) continue;
-      savings -= Number(exp.monthlyAmount);
+      const amount = overriddenAmount("expense", exp.id, cm.year, cm.monthIdx, Number(exp.monthlyAmount));
+      if (amount === null) continue;
+      savings -= amount;
     }
   }
 
@@ -1857,6 +1911,7 @@ function ProjectionPanel({
                     <ProjectionTable
                       projection={projection}
                       monthsToShow={window.count}
+                      startIndex={window.startIndex}
                     />
                   )}
                 </CardContent>

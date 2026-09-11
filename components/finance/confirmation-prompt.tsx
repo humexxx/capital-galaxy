@@ -38,7 +38,10 @@ function readDismissed(key: string): boolean {
  * if they skipped.
  */
 export function ConfirmationPrompt(props: ConfirmationPromptProps) {
-  const today = new Date().toISOString().slice(0, 10);
+  // The reader's calendar day: a UTC key expired at 7pm for someone in UTC-5
+  // and then re-showed the prompt mid-afternoon.
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const dismissKey = `${DISMISS_KEY_PREFIX}${props.planId}:${today}`;
   const dismissed = useSyncExternalStore(
     subscribeStorage,

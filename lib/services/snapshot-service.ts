@@ -48,6 +48,8 @@ export async function createDailySnapshots(): Promise<{
     .selectDistinctOn([portfolioSnapshots.portfolioId], {
       portfolioId: portfolioSnapshots.portfolioId,
       totalValue: portfolioSnapshots.totalValue,
+      date: portfolioSnapshots.date,
+      source: portfolioSnapshots.source,
     })
     .from(portfolioSnapshots)
     // `inArray` emits `IN ($1, $2, …)`. The previous raw
@@ -61,10 +63,21 @@ export async function createDailySnapshots(): Promise<{
   const latestByPortfolio = new Map(
     latestSnapshots.map((s) => [s.portfolioId, parseFloat(s.totalValue)])
   );
+  // Portfolios the cron already snapshotted today (UTC). A retried or doubled
+  // run wrote two rows for one day, and the chart drew both.
+  const todayKey = today.toISOString().slice(0, 10);
+  const doneToday = new Set(
+    latestSnapshots
+      .filter(
+        (s) => s.source === "system_cron" && s.date.toISOString().slice(0, 10) === todayKey
+      )
+      .map((s) => s.portfolioId)
+  );
 
   // 3. Decide which rows to insert.
   const rowsToInsert = balances
     .filter((b) => {
+      if (doneToday.has(b.portfolioId)) return false;
       const totalValue = parseFloat(b.totalValue);
       if (totalValue > 0) return true;
       // Only insert a zero-value snapshot if the previous one was non-zero
@@ -271,7 +284,7 @@ async function createSnapshotForPortfolio(
   const result = await db
     .select({
       totalValue: sql<string>`COALESCE(SUM(${transactions.currentValue}), 0)`,
-      count: sql<number>`COUNT(*)`,
+      count: sql<number>`COUNT(*)::int`,
     })
     .from(transactions)
     .where(
@@ -296,7 +309,7 @@ async function createSnapshotForPortfolio(
   if (totalValue === 0) {
     const futureTransactions = await db
       .select({
-        count: sql<number>`COUNT(*)`,
+        count: sql<number>`COUNT(*)::int`,
       })
       .from(transactions)
       .where(

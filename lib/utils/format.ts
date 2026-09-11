@@ -16,8 +16,11 @@ export function formatSignedCurrency(value: number | string | null | undefined):
   if (value === null || value === undefined) return "$0.00";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (Number.isNaN(num)) return "$0.00";
-  const sign = num >= 0 ? "+" : "-";
-  return `${sign}${CURRENCY_FORMATTER.format(Math.abs(num))}`;
+  // Round first: -0.004 formats as "0.00", and a minus in front of nothing
+  // is a sign with no magnitude.
+  const rounded = Math.round(num * 100) / 100;
+  const sign = rounded >= 0 ? "+" : "-";
+  return `${sign}${CURRENCY_FORMATTER.format(Math.abs(rounded))}`;
 }
 
 export function formatPercent(value: number | null | undefined, fractionDigits: number = 2): string {
@@ -27,8 +30,9 @@ export function formatPercent(value: number | null | undefined, fractionDigits: 
 
 export function formatSignedPercent(value: number | null | undefined, fractionDigits: number = 2): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "0.00%";
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(fractionDigits)}%`;
+  const text = value.toFixed(fractionDigits);
+  const sign = Number(text) >= 0 ? "+" : "";
+  return `${sign}${text.startsWith("-") && Number(text) === 0 ? text.slice(1) : text}%`;
 }
 
 export function toFixed2(value: number | string | null | undefined): string {

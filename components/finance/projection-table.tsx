@@ -27,9 +27,11 @@ const MONTH_FORMATTER = new Intl.DateTimeFormat("en-US", {
 
 type ProjectionTableProps = {
   projection: Projection;
-  /** Limits the table to the first N months of the projection. When omitted
-   *  the entire horizon is rendered. */
+  /** Limits the table to N months of the projection. When omitted the
+   *  entire horizon (from `startIndex`) is rendered. */
   monthsToShow?: number;
+  /** Index of the first row to show — the forecast window's start. */
+  startIndex?: number;
 };
 
 /** Keep months 1-12 + year-end milestones, identical to the chart densifier. */
@@ -50,7 +52,11 @@ function densify(months: ProjectionMonth[]): ProjectionMonth[] {
 // chunks rather than arbitrary numbers.
 const LOAD_MORE_STEP = 12;
 
-export function ProjectionTable({ projection, monthsToShow }: ProjectionTableProps) {
+export function ProjectionTable({
+  projection,
+  monthsToShow,
+  startIndex = 0,
+}: ProjectionTableProps) {
   const [showAll, setShowAll] = useState(false);
   // Extra months on top of the prop-supplied initial window. Reset whenever
   // the parent changes the horizon (e.g. user picks a different preset on
@@ -61,17 +67,23 @@ export function ProjectionTable({ projection, monthsToShow }: ProjectionTablePro
   const [extraMonths, setExtraMonths] = useState(0);
   const [resetKey, setResetKey] = useState<{
     monthsToShow?: number;
+    startIndex: number;
     total: number;
-  }>({ monthsToShow, total: projection.months.length });
+  }>({ monthsToShow, startIndex, total: projection.months.length });
   if (
     resetKey.monthsToShow !== monthsToShow ||
+    resetKey.startIndex !== startIndex ||
     resetKey.total !== projection.months.length
   ) {
-    setResetKey({ monthsToShow, total: projection.months.length });
+    setResetKey({ monthsToShow, startIndex, total: projection.months.length });
     setExtraMonths(0);
   }
 
-  const totalAvailable = projection.months.length;
+  // Rows start where the forecast header starts: the header names "Today" at
+  // `startIndex + pastCount`, so listing from the plan's first month put the
+  // table a year behind the figures above it on an old plan.
+  const first = Math.max(0, Math.min(startIndex, projection.months.length - 1));
+  const totalAvailable = projection.months.length - first;
   const baseCount =
     typeof monthsToShow === "number"
       ? Math.max(1, Math.min(monthsToShow, totalAvailable))
@@ -79,8 +91,8 @@ export function ProjectionTable({ projection, monthsToShow }: ProjectionTablePro
   const effectiveCount = Math.min(baseCount + extraMonths, totalAvailable);
 
   const visibleMonths = useMemo(
-    () => projection.months.slice(0, effectiveCount),
-    [projection.months, effectiveCount]
+    () => projection.months.slice(first, first + effectiveCount),
+    [projection.months, first, effectiveCount]
   );
 
   const hasInvestments = visibleMonths.some((m) => m.investments > 0.01);

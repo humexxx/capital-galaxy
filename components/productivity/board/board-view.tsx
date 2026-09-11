@@ -277,6 +277,27 @@ export function BoardView({ initialColumns, initialTasks }: BoardViewProps): Rea
 
     try {
       setPendingMutations((n) => n + 1);
+      const current = previous.find((t) => t.id === taskId);
+      // A column change is a move, not a field edit: `updateBoardTask` would
+      // write the new columnId with the old `order`, leaving a hole in the
+      // source column and a duplicate order in the destination. Reorder to
+      // the end of the destination first, then save the other fields.
+      if (current && current.columnId !== data.columnId) {
+        const destinationCount = previous.filter(
+          (t) => t.columnId === data.columnId
+        ).length;
+        const moved = await reorderBoardTaskAction({
+          taskId,
+          sourceColumnId: current.columnId,
+          destinationColumnId: data.columnId,
+          order: destinationCount,
+        });
+        if (!moved.success) {
+          setTasks(previous);
+          toast.error(moved.error || "Failed to move task");
+          throw new Error(moved.error || "Failed to move task");
+        }
+      }
       const result = await updateBoardTaskAction({ id: taskId, ...data });
       if (!result.success) {
         setTasks(previous);

@@ -185,6 +185,8 @@ function drawFrom(event: EspnEvent, slug: string): EspnDraw | null {
   if (rounds.length === 0) return null;
 
   const completed = event.status?.type?.completed === true;
+  const startsAt = event.date ? new Date(event.date).getTime() : NaN;
+  const notStarted = !Number.isNaN(startsAt) && startsAt > Date.now();
   return {
     tournament: {
       id: `espn-${event.id}-${slug}`,
@@ -192,7 +194,7 @@ function drawFrom(event: EspnEvent, slug: string): EspnDraw | null {
       location: event.venue?.address?.city ?? event.venue?.fullName ?? "—",
       startDate: (event.date ?? "").slice(0, 10),
       endDate: (event.endDate ?? event.date ?? "").slice(0, 10),
-      status: completed ? "completed" : "live",
+      status: completed ? "completed" : notStarted ? "upcoming" : "live",
       bracket: rounds,
     },
     players: [...players.values()],

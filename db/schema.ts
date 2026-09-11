@@ -738,7 +738,8 @@ export const financePlanConfirmations = pgTable(
   (t) => [
     uniqueIndex("finance_plan_confirmations_plan_month_uniq").on(t.planId, t.confirmationMonth),
     index("finance_plan_confirmations_plan_id_idx").on(t.planId),
-    check("finance_plan_confirmations_savings_chk", sql`${t.confirmedSavings} >= 0`),
+    // No >= 0 check on confirmed_savings: a deficit is carried as negative
+    // savings, and the auto-confirm cron records it as such.
     check("finance_plan_confirmations_investments_chk", sql`${t.confirmedInvestments} >= 0`),
   ]
 );

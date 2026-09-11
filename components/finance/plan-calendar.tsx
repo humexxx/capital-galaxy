@@ -173,6 +173,11 @@ function nthWeekdayOfMonth(
   return target;
 }
 
+/** A UTC-midnight instant as the same calendar day at LOCAL midnight. */
+function utcToLocalDay(d: Date): Date {
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
 function recurrenceAnchorKey(
   shape: Pick<RecurrenceShape, "recurrenceType" | "recurrenceStart">,
   planStartMonth: Date
@@ -182,7 +187,9 @@ function recurrenceAnchorKey(
     const d = parseISODate(shape.recurrenceStart);
     if (d) return d.getFullYear() * 12 + d.getMonth();
   }
-  return planStartMonth.getFullYear() * 12 + planStartMonth.getMonth();
+  // startMonth is a UTC-midnight instant; read it in UTC like the projection
+  // does, or a negative-offset zone lands the anchor a month early.
+  return planStartMonth.getUTCFullYear() * 12 + planStartMonth.getUTCMonth();
 }
 
 function buildHitResolver(
@@ -687,9 +694,12 @@ export function PlanCalendar({
   // Open on the current month — that's the most actionable view ("what's
   // happening this month?"). The "Plan start" button still jumps back to the
   // plan's beginning when the user needs the long view.
+  // The cursor is a DAY inside the period to show. It used to be the 1st of the
+  // month, which with an anchor day > 1 always belongs to the PREVIOUS period —
+  // the calendar opened one period back and "Today" led there too.
   const todayMonth = useMemo(() => {
     const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }, []);
   const planStartMonth = useMemo(() => {
     const d = new Date(plan.startMonth);
@@ -709,14 +719,19 @@ export function PlanCalendar({
 
   // Resolved "what to display": either a confirmation-day-anchored period
   // (day N → day N-1 of next month) or the cursor's calendar month.
+  // `periodRangeFor` works in UTC; everything below (the week grid, the
+  // summary, the muted test) works in LOCAL days. Convert once here, or a
+  // negative-offset zone shifts the whole period a day early and the period's
+  // last day renders greyed out with its entries missing from the totals.
   const currentRange = useMemo<Period>(() => {
     if (viewMode === "anchored") {
-      return periodRangeFor(
+      const r = periodRangeFor(
         new Date(
           Date.UTC(cursor.getFullYear(), cursor.getMonth(), cursor.getDate())
         ),
         anchorDay
       );
+      return { start: utcToLocalDay(r.start), end: utcToLocalDay(r.end) };
     }
     return { start: startOfMonth(cursor), end: endOfMonth(cursor) };
   }, [viewMode, cursor, anchorDay]);
@@ -724,9 +739,10 @@ export function PlanCalendar({
   const previousRange = useMemo<Period>(() => {
     if (viewMode === "anchored") {
       // One day before the period start lies in the previous period.
-      const prevDate = new Date(currentRange.start);
-      prevDate.setUTCDate(prevDate.getUTCDate() - 1);
-      return periodRangeFor(prevDate, anchorDay);
+      const s = currentRange.start;
+      const prevDate = new Date(Date.UTC(s.getFullYear(), s.getMonth(), s.getDate() - 1));
+      const r = periodRangeFor(prevDate, anchorDay);
+      return { start: utcToLocalDay(r.start), end: utcToLocalDay(r.end) };
     }
     const prevCursor = subMonths(cursor, 1);
     return {
@@ -913,7 +929,12 @@ export function PlanCalendar({
         if (!income) return;
         const isOneTime = income.kind === "one_time";
         if (isOneTime && income.date === targetKey) return;
-        if (!isOneTime && (income.dayOfMonth ?? 1) === target.getDate()) return;
+        if (
+          !isOneTime &&
+          income.recurrenceType === "monthly_day" &&
+          (income.dayOfMonth ?? 1) === target.getDate()
+        )
+          return;
         startOptimisticTransition(async () => {
           addOptimistic({
             kind: "income-move",
@@ -930,9 +951,11 @@ export function PlanCalendar({
               date: isOneTime ? targetKey : null,
               startDate: income.startDate,
               endDate: income.endDate,
-              recurrenceType: income.recurrenceType,
-              weekOfMonth: income.weekOfMonth,
-              dayOfWeek: income.dayOfWeek,
+              // Dropping on a day means "this day every month". A weekday or
+              // every-N rule would keep ignoring dayOfMonth and snap back.
+              recurrenceType: isOneTime ? income.recurrenceType : "monthly_day",
+              weekOfMonth: isOneTime ? income.weekOfMonth : null,
+              dayOfWeek: isOneTime ? income.dayOfWeek : null,
               intervalMonths: income.intervalMonths,
               recurrenceStart: income.recurrenceStart,
             });
@@ -953,7 +976,12 @@ export function PlanCalendar({
         if (!expense) return;
         const isOneTime = expense.kind === "one_time";
         if (isOneTime && expense.date === targetKey) return;
-        if (!isOneTime && (expense.dayOfMonth ?? 1) === target.getDate()) return;
+        if (
+          !isOneTime &&
+          expense.recurrenceType === "monthly_day" &&
+          (expense.dayOfMonth ?? 1) === target.getDate()
+        )
+          return;
         startOptimisticTransition(async () => {
           addOptimistic({
             kind: "expense-move",
@@ -968,9 +996,11 @@ export function PlanCalendar({
               kind: expense.kind,
               dayOfMonth: isOneTime ? null : target.getDate(),
               date: isOneTime ? targetKey : null,
-              recurrenceType: expense.recurrenceType,
-              weekOfMonth: expense.weekOfMonth,
-              dayOfWeek: expense.dayOfWeek,
+              // Dropping on a day means "this day every month". A weekday or
+              // every-N rule would keep ignoring dayOfMonth and snap back.
+              recurrenceType: isOneTime ? expense.recurrenceType : "monthly_day",
+              weekOfMonth: isOneTime ? expense.weekOfMonth : null,
+              dayOfWeek: isOneTime ? expense.dayOfWeek : null,
               intervalMonths: expense.intervalMonths,
               recurrenceStart: expense.recurrenceStart,
             });
@@ -1006,9 +1036,10 @@ export function PlanCalendar({
             minPaymentPercent: debt.minPaymentPercent,
             minPaymentFloor: debt.minPaymentFloor,
             dayOfMonth: target.getDate(),
-            recurrenceType: debt.recurrenceType,
-            weekOfMonth: debt.weekOfMonth,
-            dayOfWeek: debt.dayOfWeek,
+            // Same as incomes/expenses: the drop makes it a day-of-month rule.
+            recurrenceType: "monthly_day",
+            weekOfMonth: null,
+            dayOfWeek: null,
             intervalMonths: debt.intervalMonths,
             recurrenceStart: debt.recurrenceStart,
           });

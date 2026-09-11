@@ -269,10 +269,16 @@ export async function createRoadPathProgress(
       })
       .returning();
 
+    // currentValue is the NEWEST entry by date, not the last one typed: a
+    // backdated entry used to overwrite a more recent figure.
+    const latest = await tx.query.roadPathProgress.findFirst({
+      where: eq(roadPathProgress.roadPathId, data.roadPathId),
+      orderBy: [desc(roadPathProgress.date)],
+    });
     await tx
       .update(roadPaths)
       .set({
-        currentValue: data.value.toString(),
+        currentValue: latest?.value ?? data.value.toString(),
         updatedAt: new Date(),
       })
       .where(eq(roadPaths.id, data.roadPathId));
@@ -300,15 +306,14 @@ export async function deleteRoadPathProgress(progressId: string, userId: string)
     orderBy: [desc(roadPathProgress.date)],
   });
 
-  if (latestProgress) {
-    await db
-      .update(roadPaths)
-      .set({
-        currentValue: latestProgress.value,
-        updatedAt: new Date(),
-      })
-      .where(eq(roadPaths.id, progress.roadPathId));
-  }
+  // No entries left means no progress — the deleted figure must not linger.
+  await db
+    .update(roadPaths)
+    .set({
+      currentValue: latestProgress?.value ?? "0",
+      updatedAt: new Date(),
+    })
+    .where(eq(roadPaths.id, progress.roadPathId));
 }
 
 export async function calculateRoadPathStats(roadPathId: string, userId: string): Promise<RoadPathStats> {
@@ -321,7 +326,10 @@ export async function calculateRoadPathStats(roadPathId: string, userId: string)
   const targetValue = parseFloat(path.targetValue || "0");
   const currentValue = parseFloat(path.currentValue || "0");
 
-  const totalProgress = targetValue > 0 ? (currentValue / targetValue) * 100 : 0;
+  // Clamped so both the card and the detail agree, and a bar never exceeds
+  // 100% or runs negative.
+  const totalProgress =
+    targetValue > 0 ? Math.max(0, Math.min(100, (currentValue / targetValue) * 100)) : 0;
 
   const completedMilestones = path.milestones.filter((m) => m.completedAt !== null).length;
   const totalMilestones = path.milestones.length;
@@ -330,7 +338,10 @@ export async function calculateRoadPathStats(roadPathId: string, userId: string)
   if (path.targetDate) {
     const now = new Date();
     const target = new Date(path.targetDate);
-    daysRemaining = Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    daysRemaining = Math.max(
+      0,
+      Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    );
   }
 
   const startDate = path.startDate ? new Date(path.startDate) : new Date();

@@ -115,10 +115,13 @@ export function TripCalendar({
   partySize = 1,
   viewer = null,
   readOnly = false,
+  showPrices = true,
 }: {
   trip: TripWithRelations;
   partySize?: number;
   viewer?: ItineraryViewer | null;
+  /** A share link created without prices must not print them on the bars. */
+  showPrices?: boolean;
   /**
    * A shared link shows the month; it does not rearrange it. The month arrows
    * stay — reading the plan means looking at the days around it — but the
@@ -176,13 +179,14 @@ export function TripCalendar({
    */
   const costByItem = useMemo(() => {
     const map = new Map<string, string>();
+    if (!showPrices) return map;
     for (const item of trip.items) {
       if (item.price === null) continue;
       const c = readerCost(item, partySize, viewer);
       if (c.high > 0) map.set(item.id, moneyRange(c.low, c.high, trip.currency));
     }
     return map;
-  }, [trip.items, partySize, viewer, trip.currency]);
+  }, [trip.items, partySize, viewer, trip.currency, showPrices]);
 
   // Snapshotted once, not read during render: this component is rendered on
   // the server too, and a server in UTC against a reader six hours behind

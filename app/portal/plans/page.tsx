@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import { debtFreeMonthsFromNow } from "@/lib/finance/chart-series";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -40,7 +42,7 @@ export default async function FinancePlansPage() {
     projections.map((proj) => [
       proj.plan.id,
       {
-        monthsToDebtFree: proj.monthsToDebtFree,
+        monthsToDebtFree: debtFreeMonthsFromNow(proj),
         endingNetWorth: proj.endingNetWorth,
         endingDebt: proj.endingDebt,
         endDate: proj.months.at(-1)?.date ?? null,

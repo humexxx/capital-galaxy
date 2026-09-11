@@ -40,6 +40,9 @@ export function LoginForm({
   const searchParams = useSearchParams()
   // OAuth failures come back as ?error= from /auth/callback — surface them.
   const [error, setError] = useState<string | null>(searchParams.get("error"))
+  // Sign-up hands off here with ?message= ("check your email"); it was written
+  // but never read, so a new account landed on a bare login form.
+  const message = searchParams.get("message")
   const next = safeNext(searchParams.get("next"))
   const signupHref =
     next === "/portal" ? "/signup" : `/signup?next=${encodeURIComponent(next)}`
@@ -91,6 +94,15 @@ export function LoginForm({
           </Text>
         </div>
         
+        {message && !error && (
+          <div
+            className="text-muted-foreground text-sm text-center p-2 bg-muted rounded"
+            role="alert"
+            aria-live="polite"
+          >
+            {message}
+          </div>
+        )}
         {error && (
           <div
             className="text-destructive text-sm text-center p-2 bg-destructive/10 rounded"

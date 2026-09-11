@@ -171,7 +171,8 @@ export async function GET() {
           risk: "",
           amount: null,
           fee: null,
-          total: t.total,
+          // Signed so the totals line nets withdrawals instead of adding them.
+          total: t.type === "withdrawal" ? `-${t.total}` : t.total,
           contributed: t.initialValue,
           owed: t.currentValue,
           notes: null,

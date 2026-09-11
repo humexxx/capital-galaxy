@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAdminCached } from "@/lib/services/auth-server";
-import { applyMonthlyInterest } from "@/lib/services/interest-service";
+import { applyMonthlyInterest, markInterestApplied } from "@/lib/services/interest-service";
 import {
   createManualSnapshotsForAllPortfolios,
   deleteManualSnapshotsForAllPortfolios,
@@ -31,6 +31,8 @@ export async function createManualSnapshotAction(
 
   if (validated.applyInterest) {
     await applyMonthlyInterest(validated.date);
+    // Otherwise the cron applies the same month again on the 1st.
+    await markInterestApplied();
   }
 
   const { snapshotsCreated, totalValue } =

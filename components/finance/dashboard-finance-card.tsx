@@ -115,7 +115,7 @@ export async function DashboardFinanceCard({ userId }: DashboardFinanceCardProps
       label: "Debt-free in",
       value:
         projection.monthsToDebtFree !== null
-          ? `${projection.monthsToDebtFree} mo`
+          ? `${Math.max(0, projection.monthsToDebtFree - todayIdx)} mo`
           : full.debts.length === 0
           ? "—"
           : ">range",

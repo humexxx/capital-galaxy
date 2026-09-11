@@ -258,21 +258,19 @@ export function UsersTable({ users, currentAdminId }: UsersTableProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {pendingRoleChange?.nextRole === "admin"
-                ? "Promote to admin?"
-                : "Demote to user?"}
+              {pendingRoleChange
+                ? `Change role to ${ROLE_META[pendingRoleChange.nextRole].label}?`
+                : "Change role?"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingRoleChange?.nextRole === "admin" ? (
+              {pendingRoleChange && (
                 <>
-                  <strong>{pendingRoleChange?.user.fullName ?? pendingRoleChange?.user.email}</strong>{" "}
-                  will gain full admin access — including the ability to approve transactions and
-                  impersonate other users.
-                </>
-              ) : (
-                <>
-                  <strong>{pendingRoleChange?.user.fullName ?? pendingRoleChange?.user.email}</strong>{" "}
-                  will lose admin access immediately.
+                  <strong>{pendingRoleChange.user.fullName ?? pendingRoleChange.user.email}</strong>{" "}
+                  becomes {ROLE_META[pendingRoleChange.nextRole].label.toLowerCase()}:{" "}
+                  {ROLE_META[pendingRoleChange.nextRole].hint.toLowerCase()}.
+                  {pendingRoleChange.user.role === "admin" &&
+                    pendingRoleChange.nextRole !== "admin" &&
+                    " They lose admin access immediately."}
                 </>
               )}
             </AlertDialogDescription>

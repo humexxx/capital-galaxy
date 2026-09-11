@@ -256,7 +256,11 @@ function nbaHighlight(base: HighlightBase): DashboardSportHighlight {
 }
 
 function f1Highlight(base: HighlightBase, data: F1Data): DashboardSportHighlight {
-  const upcoming = data.races.find((r) => r.status === "upcoming") ?? data.races.find((r) => r.status === "live");
+  // Live first: races are in round order, so looking for "upcoming" first
+  // skipped the race happening right now in favour of the following round.
+  const upcoming =
+    data.races.find((r) => r.status === "live") ??
+    data.races.find((r) => r.status === "upcoming");
   const last = [...data.races].reverse().find((r) => r.status === "completed");
   const leader = data.drivers[0];
 
@@ -269,7 +273,7 @@ function f1Highlight(base: HighlightBase, data: F1Data): DashboardSportHighlight
     context: next
       ? `${next.circuit} · ${formatShortDate(next.date)}`
       : `Season ${data.season}`,
-    tone: upcoming ? "upcoming" : "result",
+    tone: upcoming ? (upcoming.status === "live" ? "live" : "upcoming") : "result",
     secondary: leader
       ? { label: "Drivers' leader", value: `${leader.shortName} · ${leader.points} pts` }
       : undefined,
@@ -359,7 +363,9 @@ function lolHighlight(base: HighlightBase, data: LolData): DashboardSportHighlig
   const featured =
     split.matches.find((m) => m.status === "live") ??
     split.matches.find((m) => m.status === "scheduled") ??
-    split.matches[split.matches.length - 1];
+    // Results sort most-recent-first, so the fallback is the head, not the
+    // tail (which was the oldest match of the split).
+    split.matches[0];
   const leader = split.standings[0];
   const leaderTeam = leader ? teamsMap.get(leader.teamId) : null;
 
@@ -430,16 +436,25 @@ function matchTone(match: Match): DashboardSportHighlight["tone"] {
   return "result";
 }
 
+/**
+ * A `YYYY-MM-DD` read as a calendar day. `new Date("2026-03-08")` is UTC
+ * midnight, which anybody west of Greenwich renders as the 7th.
+ */
+function dateOnly(iso: string): Date {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return y && m && d ? new Date(y, m - 1, d) : new Date(iso);
+}
+
 function formatShortDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
+  return dateOnly(iso).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
 }
 
 function formatRange(start: string, end: string): string {
-  const s = new Date(start);
-  const e = new Date(end);
+  const s = dateOnly(start);
+  const e = dateOnly(end);
   const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
   const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
   if (sameMonth) return `${s.toLocaleDateString(undefined, opts)} – ${e.getDate()}`;

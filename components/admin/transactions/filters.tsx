@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,14 @@ export function TransactionFilters() {
   const [isPending, startTransition] = useTransition();
 
   const userId = searchParams.get("userId") ?? "";
+  // Local text state, pushed to the URL after a pause. Pushing every keystroke
+  // disabled the input mid-word (it was `disabled={isPending}`) and the rest
+  // of the typing went nowhere.
+  const [userIdText, setUserIdText] = useState(userId);
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (debounce.current) clearTimeout(debounce.current);
+  }, []);
   const status = searchParams.get("status") ?? "pending";
   const type = searchParams.get("type") ?? "all";
 
@@ -48,9 +56,13 @@ export function TransactionFilters() {
         <Input
           id="filter-user-id"
           placeholder="Filter by User ID..."
-          defaultValue={userId}
-          onChange={(e) => setParam("userId", e.target.value)}
-          disabled={isPending}
+          value={userIdText}
+          onChange={(e) => {
+            const value = e.target.value;
+            setUserIdText(value);
+            if (debounce.current) clearTimeout(debounce.current);
+            debounce.current = setTimeout(() => setParam("userId", value.trim()), 300);
+          }}
         />
       </div>
 

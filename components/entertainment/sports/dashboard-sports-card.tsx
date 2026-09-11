@@ -64,8 +64,8 @@ export async function DashboardSportsCard({ userId }: DashboardSportsCardProps) 
               Sports
             </Heading>
             <Text variant="muted" className="mt-1">
-              Following {highlights.length}{" "}
-              {highlights.length === 1 ? "sport" : "sports"} · live highlights
+              Following {favorites.length}{" "}
+              {favorites.length === 1 ? "sport" : "sports"} · live highlights
               and table leaders
             </Text>
           </div>

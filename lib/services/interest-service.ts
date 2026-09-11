@@ -1,8 +1,38 @@
 import "server-only";
 
 import { db } from "@/db";
-import { transactions } from "@/db/schema";
+import { appState, transactions } from "@/db/schema";
 import { eq, and, gt, lte } from "drizzle-orm";
+
+/** `app_state` key that records the last month interest was applied for. */
+export const LAST_INTEREST_RUN_KEY = "last_interest_run";
+
+/**
+ * Records that interest has been applied as of `when`. Every caller of
+ * `applyMonthlyInterest` — the cron and the admin's manual snapshot toggle —
+ * writes this, so the other one sees the month as done and does not compound
+ * a second time.
+ */
+export async function markInterestApplied(when: Date = new Date()): Promise<void> {
+  await db
+    .insert(appState)
+    .values({ key: LAST_INTEREST_RUN_KEY, value: when.toISOString(), error: null, updatedAt: when })
+    .onConflictDoUpdate({
+      target: appState.key,
+      set: { value: when.toISOString(), error: null, updatedAt: when },
+    });
+}
+
+/** Has interest already been applied for the month containing `today`? */
+export function interestAppliedThisMonth(lastRunIso: string | null | undefined, today: Date): boolean {
+  if (!lastRunIso) return false;
+  const last = new Date(lastRunIso);
+  if (Number.isNaN(last.getTime())) return false;
+  return (
+    last.getUTCFullYear() === today.getUTCFullYear() &&
+    last.getUTCMonth() === today.getUTCMonth()
+  );
+}
 
 /**
  * Apply monthly compound interest to all active transactions

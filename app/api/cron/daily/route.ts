@@ -3,7 +3,12 @@ import { isCronAuthorized } from "@/lib/cron-auth";
 import { db } from "@/db";
 import { appState } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { applyMonthlyInterest } from "@/lib/services/interest-service";
+import {
+  applyMonthlyInterest,
+  interestAppliedThisMonth,
+  LAST_INTEREST_RUN_KEY,
+  markInterestApplied,
+} from "@/lib/services/interest-service";
 import { createDailySnapshots } from "@/lib/services/snapshot-service";
 import { createDailyFinanceSnapshots } from "@/lib/services/finance-snapshot-service";
 import { createAutomatedTasksForAllRoadPaths } from "@/lib/services/task-automation-service";
@@ -32,30 +37,24 @@ async function updateAppState(key: string, value: string, error: string | null =
   }
 }
 
+/**
+ * Once per calendar month, whatever day the job happens to run.
+ *
+ * The record in app_state is consulted on EVERY run, the 1st included: the
+ * old "always apply on the 1st" shortcut meant a retry, a manual trigger or a
+ * double fire on that day compounded a second month onto every position.
+ * With no record yet, only the 1st counts as the first month's run.
+ */
 async function shouldRunMonthlyInterest(today: Date): Promise<boolean> {
-  const isFirstDayOfMonth = today.getUTCDate() === 1;
-  
-  if (isFirstDayOfMonth) {
-    return true;
-  }
-
   const lastInterestRun = await db.query.appState.findFirst({
-    where: eq(appState.key, "last_interest_run"),
+    where: eq(appState.key, LAST_INTEREST_RUN_KEY),
   });
 
   if (!lastInterestRun?.value) {
-    return false; // First run ever, don't apply interest yet
+    return today.getUTCDate() === 1;
   }
 
-  const lastRunDate = new Date(lastInterestRun.value);
-  const lastRunMonth = lastRunDate.getUTCMonth();
-  const lastRunYear = lastRunDate.getUTCFullYear();
-  const currentMonth = today.getUTCMonth();
-  const currentYear = today.getUTCFullYear();
-
-  // If we're in a new month and haven't run interest for this month
-  return currentYear > lastRunYear || 
-    (currentYear === lastRunYear && currentMonth > lastRunMonth);
+  return !interestAppliedThisMonth(lastInterestRun.value, today);
 }
 
 async function processMonthlyInterest(today: Date) {
@@ -67,13 +66,15 @@ async function processMonthlyInterest(today: Date) {
     }
 
     const result = await applyMonthlyInterest();
-    await updateAppState("last_interest_run", today.toISOString());
-    
+    await markInterestApplied(today);
+
     return { applied: true, result };
   } catch (error) {
     console.error("Failed to process monthly interest:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    await updateAppState("last_interest_run", today.toISOString(), errorMessage);
+    // A separate key: stamping last_interest_run on failure made the next run
+    // believe the month was done and skip it.
+    await updateAppState("last_interest_error", today.toISOString(), errorMessage);
     throw error;
   }
 }

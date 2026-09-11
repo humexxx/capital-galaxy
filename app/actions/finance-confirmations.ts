@@ -17,9 +17,10 @@ export async function saveConfirmationAction(
       return { success: false, error: "Invalid input" };
     }
     await saveConfirmation(ctx.effectiveUserId, parsed.data);
-    // Only revalidate the specific plan page — confirmation never affects the
-    // sibling /portal landing or other plans.
     revalidatePath(`/portal/plans/${parsed.data.planId}`);
+    // The dashboard hosts the prompt and the calibrated finance card; without
+    // this it kept showing pre-confirmation numbers and "still due".
+    revalidatePath("/portal");
     return { success: true };
   });
 }

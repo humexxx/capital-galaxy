@@ -174,7 +174,23 @@ export async function updateBoardTask(
 }
 
 export async function deleteBoardTask(taskId: string, userId: string): Promise<void> {
-  await db.delete(boardTasks).where(and(eq(boardTasks.id, taskId), eq(boardTasks.userId, userId)));
+  const [deleted] = await db
+    .delete(boardTasks)
+    .where(and(eq(boardTasks.id, taskId), eq(boardTasks.userId, userId)))
+    .returning({ columnId: boardTasks.columnId, order: boardTasks.order });
+  if (!deleted) return;
+  // Close the gap. `reorderTask` treats the drop index as an order VALUE, so a
+  // column with holes (0, 2, 3) landed drags one slot off where the UI showed.
+  await db
+    .update(boardTasks)
+    .set({ order: sql`"order" - 1`, updatedAt: new Date() })
+    .where(
+      and(
+        eq(boardTasks.userId, userId),
+        eq(boardTasks.columnId, deleted.columnId),
+        gt(boardTasks.order, deleted.order)
+      )
+    );
 }
 
 export async function reorderTask(

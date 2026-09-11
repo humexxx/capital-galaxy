@@ -119,7 +119,8 @@ function statusFrom(game: BdlGame): MatchStatus {
 }
 
 function matchFrom(game: BdlGame): Match {
-  const played = game.status_state === "final";
+  // "in" is a game in progress — it has a score too, or a live tile is blank.
+  const played = game.status_state === "final" || game.status_state === "in";
   return {
     id: String(game.id),
     homeTeamId: String(game.home_team.id),
@@ -147,18 +148,19 @@ async function gamesIn(start: string, end: string): Promise<BdlGame[]> {
  * October's opener ahead — so the window has to be wide enough to catch both,
  * and the trimming happens here rather than in a second request.
  */
-function recentAndNext(games: BdlGame[], todayIso: string): BdlGame[] {
+function recentAndNext(games: BdlGame[]): BdlGame[] {
   const sorted = [...games].sort((a, b) => a.date.localeCompare(b.date));
-  const played = sorted.filter((g) => g.date <= todayIso);
-  const ahead = sorted.filter((g) => g.date > todayIso);
+  // By state, not by date: on a ten-game night "today's games" filled every
+  // recent slot with fixtures that had not tipped off yet.
+  const played = sorted.filter((g) => g.status_state === "final");
+  const ahead = sorted.filter((g) => g.status_state !== "final");
   return [...played.slice(-6), ...ahead.slice(0, 6)];
 }
 
 async function fetchNbaFromApi(today: Date): Promise<NbaData> {
   const season = currentSeason(today);
   const games = recentAndNext(
-    await gamesIn(iso(shift(today, -WINDOW_DAYS)), iso(shift(today, WINDOW_DAYS))),
-    iso(today)
+    await gamesIn(iso(shift(today, -WINDOW_DAYS)), iso(shift(today, WINDOW_DAYS)))
   );
 
   if (games.length === 0) throw new Error("balldontlie returned no games");

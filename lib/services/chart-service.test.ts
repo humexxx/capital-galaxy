@@ -69,7 +69,7 @@ describe("getPortfolioPerformanceData — empty snapshots", () => {
 });
 
 describe("getPortfolioPerformanceData — with snapshots", () => {
-  it("prepends a zero dummy point at start of the first snapshot's month", async () => {
+  it("starts the series at the first real snapshot — no synthetic zero", async () => {
     seedRows([
       { date: new Date("2026-03-10T00:00:00Z"), totalValue: "100" },
       { date: new Date("2026-04-12T00:00:00Z"), totalValue: "150" },
@@ -77,21 +77,10 @@ describe("getPortfolioPerformanceData — with snapshots", () => {
 
     const out = await getPortfolioPerformanceData(PORTFOLIO_ID, "All");
 
-    expect(out[0].value).toBe(0);
-    expect(new Date(out[0].date).getUTCMonth()).toBe(2); // March
-    expect(new Date(out[0].date).getUTCDate()).toBe(1);
-    // Original snapshots preserved in order.
-    expect(out[1].value).toBe(100);
-    expect(out[2].value).toBe(150);
-  });
-
-  it("uses previous month for the dummy when first snapshot is on day 1", async () => {
-    seedRows([
-      { date: new Date("2026-04-01T00:00:00Z"), totalValue: "200" },
-    ]);
-
-    const out = await getPortfolioPerformanceData(PORTFOLIO_ID, "All");
-    expect(new Date(out[0].date).getUTCMonth()).toBe(2); // March (previous)
+    // A fabricated $0 origin made the headline change read +0.0% forever.
+    expect(out[0].value).toBe(100);
+    expect(out[0].date).toBe(new Date("2026-03-10T00:00:00Z").toISOString());
+    expect(out[1].value).toBe(150);
   });
 
   it("appends a 'today' point with the last value when latest snapshot is older than today", async () => {
@@ -101,8 +90,8 @@ describe("getPortfolioPerformanceData — with snapshots", () => {
 
     const out = await getPortfolioPerformanceData(PORTFOLIO_ID, "All");
 
-    // dummy + snapshot + today = 3 points
-    expect(out).toHaveLength(3);
+    // snapshot + today = 2 points
+    expect(out).toHaveLength(2);
     const tail = out[out.length - 1];
     expect(tail.value).toBe(300); // copies forward
     expect(tail.date).toBe(new Date("2026-05-15T12:00:00Z").toISOString());
@@ -115,8 +104,8 @@ describe("getPortfolioPerformanceData — with snapshots", () => {
     ]);
 
     const out = await getPortfolioPerformanceData(PORTFOLIO_ID, "All");
-    // dummy + snapshot, no extra tail entry
-    expect(out).toHaveLength(2);
+    // just the snapshot, no extra tail entry
+    expect(out).toHaveLength(1);
     expect(out[out.length - 1].value).toBe(500);
   });
 
